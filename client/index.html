@@ -12,11 +12,11 @@
   <script src="lib/NexusUI.js"></script>
   <link rel="stylesheet" href="lib/lab.css">
   <!-- actual experiment code -->
-  <script src="experiment.js" type="module"></script>
+  <script src="scripts/experiment.js" type="module"></script>
 </head>
 <body>
   <script type="module">
-    import {createExperiment} from './experiment.js';
+    import {createExperiment} from './scripts/experiment.js';
 
     class FMSynthNode extends AudioWorkletNode {
       constructor(context) {
