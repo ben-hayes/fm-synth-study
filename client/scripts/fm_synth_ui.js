@@ -1,5 +1,4 @@
-//define(['../lib/NexusUI'], function (Nexus) {
-define(function(require) {
+define(function() {
 //
 // Settings for Nexus UI controls
 //
