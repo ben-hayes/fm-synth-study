@@ -35,7 +35,7 @@ return class FMSynth {
     }
 
     setParam(paramName, value, rampTime) {
-
+        this.node_.parameters.get(paramName).value = value;
     }
 
     setAllParams(paramStates, rampTime) {

@@ -22,10 +22,10 @@ class ADSR {
     }
 
     setParams(attack, decay, sustain, release) {
-        this.attack_ = attack * this.segmentLength_;
-        this.decay_ = decay * this.segmentLength_;
+        this.attack_ = (attack ** 3.0) * this.segmentLength_;
+        this.decay_ = (decay ** 3.0) * this.segmentLength_;
         this.sustain_ = sustain;
-        this.release_ = release * this.segmentLength_;
+        this.release_ = (release ** 3.0) * this.segmentLength_;
     }
 
     attack() {
@@ -87,6 +87,11 @@ class ADSR {
             break;
         }
 
+        const diff = envValue - this.lastEnvValue_;
+        if (diff > 0.008) {
+            envValue = this.lastEnvValue_ + diff * 0.008;
+        }
+
         this.lastEnvValue_ = envValue;
         return envValue;
     }
@@ -96,7 +101,7 @@ class FMSynthProcessor extends AudioWorkletProcessor {
     constructor () {
         super();
 
-        this.envStageMaxLength = 3 * sampleRate;
+        this.envStageMaxLength = 2* sampleRate;
 
         this.env1 = new ADSR(this.envStageMaxLength);
         this.env2 = new ADSR(this.envStageMaxLength);
@@ -122,6 +127,9 @@ class FMSynthProcessor extends AudioWorkletProcessor {
         this.env1.attack();
         this.env2.attack();
         this.env3.attack();
+        //this.op1_phase_ = 0.0;
+        //this.op2_phase_ = 0.0;
+        //this.op3_phase_ = 0.0;
     }
 
     noteOff() {
