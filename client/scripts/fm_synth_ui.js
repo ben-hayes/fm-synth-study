@@ -135,7 +135,7 @@ function setupEnvelopeCallbacks (env, attack, decay, sustain, release) {
     release.value = release.value;
 }
 
-function startSynthUI(parameterChangeCallback) {
+function startSynthUI(parameterChangeCallback, keyboardChangeCallback) {
     const ui = [];
 
     let operator_index = 0;
@@ -193,6 +193,7 @@ function startSynthUI(parameterChangeCallback) {
         lowNote: 36,
         highNote: 72
     });
+    ui.keyboard.on('change', keyboardChangeCallback);
 
     return ui;
 }

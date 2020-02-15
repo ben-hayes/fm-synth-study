@@ -39,6 +39,7 @@ class ADSR {
 
         this.releaseAmp_ = this.lastEnvValue_;
         this.state_ = ADSRStates.RELEASE;
+        this.phase_ = 0;
     }
 
     process() {

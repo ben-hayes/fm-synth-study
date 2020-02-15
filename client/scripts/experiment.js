@@ -1,28 +1,55 @@
-import {prepareSynthUI, makeSynth} from './synth_interface.js';
+requirejs.config({
+    shim: {
+        lab: {
+            exports: 'lab'
+        }
+    },
+    paths: {
+        lab: '../lib/lab'
+    }
+});
 
-//
-// Define some global parameters (these could be pulled from server?)
-//
-const num_sounds = 3;
-const params = [
-    {index: 0},
-    {index: 1}
-];
+define(['lab'], function(lab) {
+async function createSynthScreen(fm_synth, fm_synth_ui) {
+    const synth_html = await fm_synth_ui.getSynthHTML();
+    const synth_screen = new lab.html.Form({
+        content: synth_html
+    });
 
-//
-// Experiment code
-//
-export async function createExperiment(param_map) {
-    const experiment = new lab.flow.Sequence();
-    const done = new lab.html.Screen({content: "Finito"});
+    let ui;
+    synth_screen.on('run', () => {
+        ui = fm_synth_ui.startSynthUI(
+            fm_synth.setParam.bind(fm_synth),
+            keyboard_event => {
+                if (keyboard_event.state) {
+                    fm_synth.startNote(keyboard_event.note);
+                } else {
+                    fm_synth.endNote();
+                }
+            });
+    });
+    synth_screen.on('end', () => {
+        fm_synth_ui.cleanupSynthUI(ui);
+    });
 
-    const {synth_html, synth_callback} = await prepareSynthUI(param_map);
-    const loop = new lab.flow.Loop({
-        template: makeSynth.bind(undefined, synth_html, synth_callback),
-        templateParameters: params,
-    })
+    return synth_screen;
+}
 
-    experiment.options.content = [loop, done];
-
+async function createExperiment(
+    fm_synth,
+    fm_synth_ui,
+    synth_presets,
+    semantic_prompts) 
+{
+    const experiment = new lab.flow.Sequence({
+        content: [
+            await createSynthScreen(fm_synth, fm_synth_ui)
+        ]
+    });
     return experiment;
 }
+
+return {
+    createExperiment
+};
+});

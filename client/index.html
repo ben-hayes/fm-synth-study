@@ -5,56 +5,21 @@
   <title>Experiment</title>
   <!-- viewport setup -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- lab.js and libraries -->
-  <script src="lib/lab.js" data-labjs-script="library"></script>
-  <script src="lib/lab.fallback.js" data-labjs-script="fallback"></script>
-  <!-- NexusUI library -->
-  <script src="lib/NexusUI.js"></script>
   <link rel="stylesheet" href="lib/lab.css">
-  <!-- actual experiment code -->
-  <script src="scripts/experiment.js" type="module"></script>
+  <script type="text/javascript" src="lib/NexusUI.js"></script>
+  <script data-main="scripts/main" src="lib/require.js"></script>
 </head>
 <body>
-  <script type="module">
-    import {createExperiment} from './scripts/experiment.js';
-
-    class FMSynthNode extends AudioWorkletNode {
-      constructor(context) {
-        super(context, 'fm_synth_processor');
-      }
-    }
-
-    const context = new AudioContext();
-
-    async function setupAudioWorklet () {
-      await context.audioWorklet.addModule('synth_processor.js');
-      const node = new FMSynthNode(context);
-      node.connect(context.destination);
-      return node;
-    }
-
-    setupAudioWorklet().then(node => {
-      createExperiment(node.parameters).then(experiment => experiment.run());
-    });
-    
-
-    createExperiment().then(experiment => experiment.run());
-  </script>
-  <!-- If you'd rather have a container with a fixed width
-       and variable height, try removing the fullscreen class below -->
   <div class="container fullscreen">
     <header class="content-vertical-center content-horizontal-center">
       <div>
-        <!-- You could put a title here,
-             or remove the header element entirely -->
+        <!--title if wanted-->
       </div>
     </header>
     <main
       class="content-vertical-center content-horizontal-center"
       data-labjs-section="main"
     >
-      <!-- the nested div is helpful because the centering would
-           otherwise break the natural flow of content -->
       <div>
         <img src="lib/loading.svg" alt="loading icon" style="padding: 1rem"><br>
         <p>
@@ -65,8 +30,6 @@
     </main>
     <footer class="content-vertical-center content-horizontal-center">
       <div>
-        <!-- Again, please feel free to replace the footer content,
-             or to remove the footer if you don't need it -->
         <small class="text-muted">FM Synthesis Study, Queen Mary University of London</small>
       </div>
     </footer>
