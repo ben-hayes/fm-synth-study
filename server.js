@@ -37,6 +37,7 @@ app.get('/api/test', function(req, res) {
 
 app.post('/api/save-experiment', function(req, res) {
     const experiment_data = req.body;
+    console.log(experiment_data);
 
     experiment_data.creationData = new Date();
 
