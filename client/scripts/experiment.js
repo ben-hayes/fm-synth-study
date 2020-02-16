@@ -313,6 +313,9 @@ async function createExperiment(
         plugins: [
             new lab.plugins.Transmit({
                 url: 'https://qm-fm-study.herokuapp.com/api/save-experiment',
+                updates: {
+                    full: true
+                }
             })
         ],
         datastore

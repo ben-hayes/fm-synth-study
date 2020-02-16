@@ -37,11 +37,12 @@ app.get('/api/test', function(req, res) {
 
 app.post('/api/save-experiment', function(req, res) {
     const experiment_data = req.body;
-    console.log(experiment_data);
+    delete experiment_data._id;
 
     experiment_data.creationData = new Date();
+    const object_id = new ObjectID(experiment_data.metadata.id);
 
-    db.collection(FM_STUDY_COLLECTION).insertOne(experiment_data, (err, doc) => {
+    db.collection(FM_STUDY_COLLECTION).updateOne({_id: object_id}, experiment_data, (err, doc) => {
         if (err) {
             handleError(res, err.message, "Failed to insert experiment data");
         } else {
