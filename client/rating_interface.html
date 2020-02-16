@@ -1,0 +1,34 @@
+<style>
+    .input_cell {
+        width: 150px
+    }
+</style>
+
+<div><span>Please listen to the reference sound and the sound you created.</span>
+
+    <div><span>Play <b>reference</b> sound: <button type="button" id="play-ref">Play</button></span><br />
+    <span>Play <b>created</b> sound: <button type="button" id="play-new">Play</button></span></div>
+
+    <div>
+        <%TEXT%>
+        <span>You may listen to the two sounds as many times as you wish.</span><br />
+        <h3>Compared to the reference sound, the created sound is...</h3>
+    </div>
+
+<div><form>
+    <table>
+        <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td><%MIDDLE_TEXT%></td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+        <%ROWS%>
+    </table>
+    <button type="submit" id="submit">Submit</button>
+</form>
+</div>
+</div>

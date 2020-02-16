@@ -22,6 +22,7 @@ return class FMSynth {
     constructor(audioContext) {
         this.context_ = audioContext;
         this.initialized_ = false;
+        this.note_timeout_ = undefined;
     }
 
     async initialize() {
@@ -39,7 +40,21 @@ return class FMSynth {
     }
 
     setAllParams(paramStates, rampTime) {
+        for (let param in paramStates) {
+            this.node_.parameters.get(param).value = paramStates[param];
+        }
+    }
 
+    getParam(paramName) {
+        return this.node_.parameters.get(paramName).value;
+    }
+
+    getAllParams() {
+        const paramStates = {};
+        for (const key of this.node_.parameters.keys()) {
+            paramStates[key] = this.node_.parameters.get(key).value;
+        }
+        return paramStates;
     }
 
     startNote(note) {
@@ -53,6 +68,23 @@ return class FMSynth {
         this.node_.port.postMessage({
             'type': 'note_off',
         });
+    }
+
+    playNoteWithEnvLengths(note, sustainTime, segmentLength) {
+        const attackTime = Math.max(
+            this.getParam('attack_1'),
+            this.getParam('attack_2'),
+            this.getParam('attack_3'));
+        const decayTime = Math.max(
+            this.getParam('decay_1'),
+            this.getParam('decay_2'),
+            this.getParam('decay_3'));
+
+        const holdTime = (attackTime + decayTime + sustainTime) * segmentLength;
+
+        this.startNote(note);
+        if (this.noteTimeout !== undefined) clearTimeout(this.noteTimeout);
+        this.noteTimeout = setTimeout(() => this.endNote(), holdTime * 1000);
     }
 }
 });

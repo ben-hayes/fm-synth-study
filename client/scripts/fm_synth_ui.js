@@ -22,13 +22,13 @@ const adsr_settings = {
     ]
 };
 
-const coarse_settings = {min: 0.5, max: 48, step: 0.5, value: 1};
-const fine_settings = {min: 0, max: 999, step: 1, value: 0};
-const gain_settings = {min: 0, max: 1.0, step: 0.01, value: 0.7};
-const attack_settings = {min: 0.0, max: 1.0, step: 0.01, value: 0.15};
-const decay_settings = {min: 0.0, max: 1.0, step: 0.01, value: 0.25};
-const sustain_settings = {min: 0.0, max: 1.0, step: 0.01, value: 0.4};
-const release_settings = {min: 0.0, max: 1.0, step: 0.01, value: 0.3};
+const coarse_settings = {min: 1, max: 48, step: 1, value: 1};
+const fine_settings = {min: -499, max: 499, step: 1, value: 0};
+const gain_settings = {min: 0, max: 1.0, step: 0.001, value: 0.7};
+const attack_settings = {min: 0.0, max: 1.0, step: 0.001, value: 0.15};
+const decay_settings = {min: 0.0, max: 1.0, step: 0.001, value: 0.25};
+const sustain_settings = {min: 0.0, max: 1.0, step: 0.001, value: 0.4};
+const release_settings = {min: 0.0, max: 1.0, step: 0.001, value: 0.3};
 
 Object.assign(coarse_settings, dial_settings);
 Object.assign(fine_settings, dial_settings);
@@ -209,14 +209,24 @@ function cleanupSynthUI(ui) {
     }
 }
 
-return {
-    getSynthHTML: async () => {
-        const synthData = await fetch('./synth_interface.html');
-        const synthHtml = await synthData.text();
+function setAllParams(param_map, ui) {
+    for (let param in param_map) {
+        const [param_name, op_index_plus_one] = param.split('_');
+        ui[op_index_plus_one - 1][param_name].value = param_map[param];
+    }
+}
 
-        return synthHtml;
-    },
+async function getSynthHTML() {
+    const synthData = await fetch('./synth_interface.html');
+    const synthHtml = await synthData.text();
+
+    return synthHtml;
+}
+
+return {
+    getSynthHTML,
     startSynthUI,
     cleanupSynthUI,
+    setAllParams
 };
 })
