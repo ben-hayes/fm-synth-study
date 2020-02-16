@@ -49,7 +49,7 @@ app.post('/api/save-experiment', function(req, res) {
           if (err) {
               handleError(res, err.message, "Failed to insert experiment data");
           } else {
-              res.status(201).json(doc.ops[0]);
+              res.status(201);
               console.log("Successfully stored experiment data");
           }
     });
