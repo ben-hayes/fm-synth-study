@@ -1,7 +1,6 @@
 const express = require('express');
 const body_parser = require('body-parser');
 const mongodb = require('mongodb');
-const ObjectID = mongodb.ObjectID;
 
 const FM_STUDY_COLLECTION = 'fm_study';
 
@@ -30,10 +29,6 @@ function handleError(res, reason, message, code) {
     console.log("ERROR: " + reason);
     res.status(code || 500).json({"error": message});
 }
-
-app.get('/api/test', function(req, res) {
-    res.status(200).json({fart:'poop'});
-});
 
 app.post('/api/save-experiment', function(req, res) {
     const experiment_data = req.body;

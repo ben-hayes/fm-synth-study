@@ -25,7 +25,8 @@ async function createMainLoop(fm_synth,
                 fm_synth_ui,
                 param_snapshot,
                 semantic_prompt,
-                semantic_descriptors);
+                semantic_descriptors,
+                i);
         sequences.push(sequence);
     }
     for (let param_snapshot of synth_presets) {
@@ -38,7 +39,8 @@ async function createMainSequence(
     fm_synth_ui,
     param_snapshot,
     semantic_prompt,
-    semantic_descriptors)
+    semantic_descriptors,
+    index)
 {
     const param_store = {};
     const prompt_text = semantic_descriptors
@@ -51,7 +53,8 @@ async function createMainSequence(
                 fm_synth_ui,
                 param_snapshot,
                 param_store,
-                prompt_text),
+                prompt_text,
+                index),
             await createPromptRatingScreen(
                 fm_synth,
                 param_snapshot,
@@ -98,11 +101,11 @@ function createPromptRow(semantic_prompt) {
     return `
             <tr>
                 <td>Not much ${semantic_prompt}</td>
-                <td class="input_cell"><input type="radio" name="${semantic_prompt}"></td>
-                <td class="input_cell"><input type="radio" name="${semantic_prompt}"></td>
-                <td class="input_cell"><input type="radio" name="${semantic_prompt}"></td>
-                <td class="input_cell"><input type="radio" name="${semantic_prompt}"></td>
-                <td class="input_cell"><input type="radio" name="${semantic_prompt}"></td>
+                <td class="input_cell"><input type="radio" name="${semantic_prompt}" value="0"></td>
+                <td class="input_cell"><input type="radio" name="${semantic_prompt}" value="1"></td>
+                <td class="input_cell"><input type="radio" name="${semantic_prompt}" value="2"></td>
+                <td class="input_cell"><input type="radio" name="${semantic_prompt}" value="3"></td>
+                <td class="input_cell"><input type="radio" name="${semantic_prompt}" value="4"></td>
                 <td>Much ${semantic_prompt}</td>
             </tr>
         `;
@@ -158,11 +161,11 @@ function createDescriptorRows (semantic_descriptors, semantic_prompt) {
             const row = `
                 <tr>
                     <td>Much ${descriptor.less}</td>
-                    <td class="input_cell"><input type="radio" name="${descriptor.name}"></td>
-                    <td class="input_cell"><input type="radio" name="${descriptor.name}"></td>
-                    <td class="input_cell"><input type="radio" name="${descriptor.name}"></td>
-                    <td class="input_cell"><input type="radio" name="${descriptor.name}"></td>
-                    <td class="input_cell"><input type="radio" name="${descriptor.name}"></td>
+                    <td class="input_cell"><input type="radio" name="${descriptor.name}" value="-2"></td>
+                    <td class="input_cell"><input type="radio" name="${descriptor.name}" value="-1"></td>
+                    <td class="input_cell"><input type="radio" name="${descriptor.name}" value="0"></td>
+                    <td class="input_cell"><input type="radio" name="${descriptor.name}" value="1"></td>
+                    <td class="input_cell"><input type="radio" name="${descriptor.name}" value="2"></td>
                     <td>Much ${descriptor.more}</td>
                 </tr>
             `;
@@ -198,11 +201,13 @@ async function createSynthScreen(
     fm_synth_ui,
     param_snapshot,
     param_store,
-    semantic_prompt) 
+    semantic_prompt,
+    index) 
 {
     const synth_html = await fm_synth_ui.getSynthHTML();
     const synth_screen = new lab.html.Form({
-        content: synth_html.replace('<%PROMPT%>', `Please edit the synth parameters to make this sound <em>${semantic_prompt}</em>`)
+        content: synth_html.replace('<%PROMPT%>', `Please edit the synth parameters to make this sound <em>${semantic_prompt}</em>`),
+        id: `synth_${index}`
     });
 
     let ui;
@@ -231,7 +236,8 @@ async function createSynthScreen(
 async function createSynthDemo(fm_synth, fm_synth_ui) {
     const synth_html = await fm_synth_ui.getSynthHTML();
     const synth_screen = new lab.html.Form({
-        content: synth_html.replace('<%PROMPT%>', `Please familiarise yourself with the synthesiser below.`)
+        content: synth_html.replace('<%PROMPT%>', `Please familiarise yourself with the synthesiser below.`),
+        id: "synth_demo"
     });
     let ui;
     synth_screen.on('run', () => {
