@@ -4,23 +4,10 @@ const mongodb = require('mongodb');
 const ObjectID = mongodb.ObjectID;
 
 const FM_STUDY_COLLECTION = 'fm_study';
-var allowCrossDomain = function(req, res, next) {
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
-
-    // intercept OPTIONS method
-    if ('OPTIONS' == req.method) {
-      res.send(200);
-    }
-    else {
-      next();
-    }
-};
 
 const app = express();
 app.use(body_parser.json());
-app.use(allowCrossDomain);
+app.use(express.static('client'));
 
 let db;
 
