@@ -43,7 +43,7 @@ app.post('/api/save-experiment', function(req, res) {
     db.collection(FM_STUDY_COLLECTION)
       .updateOne(
         {'metadata.id': experiment_data.metadata.id},
-        experiment_data,
+        {$set: experiment_data},
         {upsert: true},
         (err, doc) => {
           if (err) {
