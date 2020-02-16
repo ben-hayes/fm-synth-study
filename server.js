@@ -60,8 +60,8 @@ app.post('/api/save-experiment', function(req, res) {
               db.collection(FM_STUDY_COLLECTION)
                 .updateOne(
                   {'metadata.id': experiment_data.metadata.id},
-                  {upsert: true},
                   {$push: {data: experiment_data.data}},
+                  {upsert: true},
                   (err, doc) => {
                     if (err) {
                       handleError(res, err.message, "Failed to update record");
