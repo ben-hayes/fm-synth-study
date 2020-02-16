@@ -41,19 +41,22 @@ async function createMainSequence(
     semantic_descriptors)
 {
     const param_store = {};
+    const prompt_text = semantic_descriptors
+                            [semantic_prompt.descriptor_index]
+                            [semantic_prompt.direction];
     const sequence = new lab.flow.Sequence({
         content: [
             await createSynthScreen(
                 fm_synth,
                 fm_synth_ui,
                 param_snapshot,
-                param_store),
+                param_store,
+                prompt_text),
             await createPromptRatingScreen(
                 fm_synth,
                 param_snapshot,
                 param_store,
-                semantic_prompt,
-                semantic_descriptors),
+                prompt_text),
             await createDescriptorRatingScreen(
                 fm_synth,
                 param_snapshot,
@@ -69,21 +72,17 @@ async function createPromptRatingScreen(
     fm_synth,
     param_snapshot,
     param_store,
-    semantic_prompt,
-    semantic_descriptors)
+    semantic_prompt)
 {
-    const prompt = semantic_descriptors
-                        [semantic_prompt.descriptor_index]
-                        [semantic_prompt.direction]
     const rating_screen_data = await fetch('rating_interface.html');
     const rating_screen_html = await rating_screen_data.text();
-    const text = createPromptText(prompt);
-    const row = createPromptRow(prompt);
+    const text = createPromptText(semantic_prompt);
+    const row = createPromptRow(semantic_prompt);
     const rating_screen = new lab.html.Form({
         content: rating_screen_html
                     .replace('<%ROWS%>', row)
                     .replace('<%TEXT%>', text)
-                    .replace('<%MIDDLE_TEXT%>', `Somewhat ${prompt}`)
+                    .replace('<%MIDDLE_TEXT%>', `Somewhat ${semantic_prompt}`)
     });
 
     activateRatingScreenSynth(
@@ -198,11 +197,12 @@ async function createSynthScreen(
     fm_synth,
     fm_synth_ui,
     param_snapshot,
-    param_store) 
+    param_store,
+    semantic_prompt) 
 {
     const synth_html = await fm_synth_ui.getSynthHTML();
     const synth_screen = new lab.html.Form({
-        content: synth_html
+        content: synth_html.replace('<%PROMPT%>', `Please edit the synth parameters to make this sound <em>${semantic_prompt}</em>`)
     });
 
     let ui;
@@ -228,6 +228,61 @@ async function createSynthScreen(
     return synth_screen;
 }
 
+async function createSynthDemo(fm_synth, fm_synth_ui) {
+    const synth_html = await fm_synth_ui.getSynthHTML();
+    const synth_screen = new lab.html.Form({
+        content: synth_html.replace('<%PROMPT%>', `Please familiarise yourself with the synthesiser below.`)
+    });
+    let ui;
+    synth_screen.on('run', () => {
+        ui = fm_synth_ui.startSynthUI(
+            fm_synth.setParam.bind(fm_synth),
+            keyboard_event => {
+                if (keyboard_event.state) {
+                    fm_synth.startNote(keyboard_event.note);
+                } else {
+                    fm_synth.endNote();
+                }
+            });
+    });
+    synth_screen.on('end', () => {
+        fm_synth_ui.cleanupSynthUI(ui);
+    });
+
+
+    return synth_screen;
+}
+
+async function createIntroductionScreens() {
+    const intro_data = await fetch('experiment_text.json');
+    const intro_prompts = JSON.parse(await intro_data.text());
+    const screens = [];
+    for (let screen of intro_prompts.pre_demo_screens) {
+        screens.push(new lab.html.Screen({
+            content: screen.join(''),
+            responses:{ keypress: 'confirm' }
+        }));
+    }
+    return screens;
+}
+
+function createExperimentScreens(text_list) {
+    const screens = [];
+    for (let screen of text_list) {
+        screens.push(new lab.html.Screen({
+            content: screen.join(''),
+            responses:{ keypress: 'confirm' }
+        }));
+    }
+    return screens;
+}
+
+async function getExperimentText() {
+    const intro_data = await fetch('experiment_text.json');
+    const intro_prompts = JSON.parse(await intro_data.text());
+    return intro_prompts;
+}
+
 async function createExperiment(
     fm_synth,
     fm_synth_ui,
@@ -235,13 +290,25 @@ async function createExperiment(
     semantic_prompts,
     semantic_descriptors) 
 {
+    const experiment_text = await getExperimentText();
+    const introduction =
+        createExperimentScreens(experiment_text.pre_demo_screens);
+    const demo = await createSynthDemo(fm_synth, fm_synth_ui);
+    const post_demo =
+        createExperimentScreens(experiment_text.post_demo_screens);
+
+    const main_loop = await createMainLoop(
+        fm_synth,
+        fm_synth_ui,
+        synth_presets,
+        semantic_prompts,
+        semantic_descriptors);
+
     const experiment = new lab.flow.Sequence({
-        content: await createMainLoop(
-            fm_synth,
-            fm_synth_ui,
-            synth_presets,
-            semantic_prompts,
-            semantic_descriptors)
+        content: [].concat(introduction)
+                   .concat(demo)
+                   .concat(post_demo)
+                   .concat(main_loop)
     });
     return experiment;
 }

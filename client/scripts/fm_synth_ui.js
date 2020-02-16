@@ -135,6 +135,25 @@ function setupEnvelopeCallbacks (env, attack, decay, sustain, release) {
     release.value = release.value;
 }
 
+const keyboard_map = {
+    a: 0,
+    w: 1,
+    s: 2,
+    e: 3,
+    d: 4,
+    f: 5,
+    t: 6,
+    g: 7,
+    y: 8,
+    h: 9,
+    u: 10,
+    j: 11,
+    k: 12,
+    o: 13,
+    l: 14,
+    p: 15,
+};
+
 function startSynthUI(parameterChangeCallback, keyboardChangeCallback) {
     const ui = [];
 
@@ -189,11 +208,43 @@ function startSynthUI(parameterChangeCallback, keyboardChangeCallback) {
         operator_index += 1;
     }
 
+    const kb_low = 36;
+    const kb_high = 72;
+
     ui.keyboard = new Nexus.Piano("#keyboard", {
-        lowNote: 36,
-        highNote: 72
+        lowNote: kb_low,
+        highNote: kb_high
     });
     ui.keyboard.on('change', keyboardChangeCallback);
+
+    let octave = 48;
+    const held_keys = {};
+
+    document.addEventListener('keydown', event => {
+        const key_name = event.key;
+
+        if (key_name === 'z') octave -= octave < kb_low + 12 ? 0 : 12;
+        if (key_name === 'x') octave += octave > kb_high - 12 ? 0 : 12;
+        if (key_name in keyboard_map && !held_keys[key_name]) {
+            const note = octave + keyboard_map[key_name];
+            if (note >= kb_low && note <= kb_high) {
+                ui.keyboard.toggleKey(note, true);
+            }
+        }
+
+        held_keys[key_name] = true;
+    });
+    document.addEventListener('keyup', event => {
+        const key_name = event.key;
+        held_keys[key_name] = false;
+
+        if (key_name in keyboard_map) {
+            const note = octave + keyboard_map[key_name];
+            if (note >= kb_low && note <= kb_high) {
+                ui.keyboard.toggleKey(note, false);
+            }
+        } 
+    });
 
     return ui;
 }

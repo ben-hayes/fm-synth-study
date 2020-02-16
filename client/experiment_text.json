@@ -1,0 +1,62 @@
+{
+    "pre_demo_screens": [
+        [
+            "<span><p>Welcome to the study, and thank you for agreeing to take part.</p>",
+            "<p>In this study you will be asked to program a synthesiser to create sounds in response to some descriptive words.</p>",
+            "<p>The following pages contain instructions on how to complete the experiment. Please read them carefully.</p>",
+            "<p><b>When you are ready to continue, please press any key to move to the next screen</b></p></span>"
+        ],
+        [
+            "<span><p>In order to complete the study, you must be using the latest version of the Google Chrome browser on a laptop or desktop computer.</p>",
+            "<p>You should also use headphones or reference monitor speakers.</p>",
+            "<p>Please do not attempt to complete the study using laptop speakers.</p>",
+            "<p><b>When you are ready to continue, please press any key to move to the next screen</b></p></span>"
+        ],
+        [
+            "<span><p>Before continuing, we must adjust the volume of your listening apparatus.</p>",
+            "<p>Please ensure that no other sound is playing on your computer and follow these steps carefully.</p>",
+            "<p>First, turn down your computer volume until it makes no sound.</p>",
+            "<p>It is important to reduce the volume rather than simply pressing mute.</p>",
+            "<p><b>When you are ready to continue, please press any key to move to the next screen</b></p></span>"
+        ],
+        [
+            "<span> <p>Click play on the audio player below. Once started, the player will loop automatically.</p>",
+            "<p><audio controls loop=\"true\" autostart=\"0\"><source src=\"audio/reference_noise.wav\" autoplay=\"false\" loop=\"true\"></audio></p>",
+            "<p>Now, gradually increase your computer's volume until the white noise is at a comfortable listening level.</p>",
+            "<p>It is important that you <em>do not change</em> your computer's volume for the rest of the experiment.</p>",
+            "<p><b>When you are ready to continue, please press any key to move to the next screen</b></p></span>"
+        ],
+        [
+            "<span><p>When the experiment starts, you will be presented with a simple FM synthesiser, which will already be programmed to produce a sound.</p>",
+            "<p>Above the synthesiser, you will see an instruction to alter the sound in some way. For example, you might be asked to make a sound brighter, or less rough.</p>",
+            "<p>Your task is to alter the parameters of the synthesiser in order to match the description given. You may take as much time as you wish to achieve this.</p>",
+            "<p><b>When you are ready to continue, please press any key to move to the next screen</b></p></span>"
+        ],
+        [
+            "<span><p>The synthesiser is a <b>three operator</b> FM synthesiser.</p>",
+            "<p>The operators are organised according to the following algorithm:</p>",
+            "<p><img src=\"img/op_diagram.png\"></p>",
+            "<p>This means that operator <em>one</em> is the carrier, and operators <em>two</em> and <em>three</em> both directly modulate its frequency.</p>",
+            "<p><b>When you are ready to continue, please press any key to move to the next screen</b></p></span>"
+        ],
+        [
+            "<span><p>On the next screen, you will be able to practice making a sound with the synthesiser.</p>",
+            "<p>Please take as much time as you need to familiarise yourself with the controls.</p>",
+            "<p>You can play notes using the piano keyboard at the bottom of the screen.</p>",
+            "<p>You can also use your computer keyboard. The keys in the row from from A-L correspond to the white notes, and the keys W, E, T, Y, U and O correspond to the black notes. You can use the Z and X keys to change octave.</p>",
+            "<p>Once you are finished, you can click the submit button to move on.</p>",
+            "<p><b>When you are ready to continue, please press any key to move to the next screen</b></p></span>"
+        ]
+    ],
+    "post_demo_screens": [
+        [
+            "<span><p>After you have submitted your sound, you will be asked some questions about the sound you have created.</p>",
+            "<p>There is no right or wrong response to these questions. Please simply answer to the best of your ability.</p>",
+            "<p><b>When you are ready to continue, please press any key to move to the next screen</b></p></span>"
+        ],
+        [
+            "<span><p>You will be asked to create 10 sounds. Once you are done, you will be asked a few short questions.</p>",
+            "<p>The experiment will begin on the next screen. <b>When you are ready, press any key to start.</b></p></span>"
+        ]
+    ]
+}
