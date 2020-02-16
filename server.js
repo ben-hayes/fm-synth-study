@@ -41,6 +41,39 @@ app.post('/api/save-experiment', function(req, res) {
     experiment_data.creationData = new Date();
 
     db.collection(FM_STUDY_COLLECTION)
+      .find(
+        {'metadata.id': experiment_data.metadata.id},
+        (err, count) => {
+          if (err) {
+            handleError(res, err.message, "Failed to check for existing records");
+          } else {
+            if (count === 0) {
+              db.collection(FM_STUDY_COLLECTION)
+                .insert(experiment_data, (err, doc) => {
+                  if (err) {
+                    handleError(res, err.message, "Failed to insert new record");
+                  } else {
+                    res.status(201);
+                  }
+                });
+            } else {
+              db.collection(FM_STUDY_COLLECTION)
+                .updateOne(
+                  {'metadata.id': experiment_data.metadata.id},
+                  {upsert: true},
+                  {$push: {data: experiment_data.data}},
+                  (err, doc) => {
+                    if (err) {
+                      handleError(res, err.message, "Failed to update record");
+                    } else {
+                      res.status(201);
+                    }
+                  }
+                );
+            }
+          }
+        }
+      )
       .updateOne(
         {'metadata.id': experiment_data.metadata.id},
         {$set: experiment_data},
