@@ -42,7 +42,7 @@ app.post('/api/save-experiment', function(req, res) {
     experiment_data.creationData = new Date();
     const object_id = new ObjectID(experiment_data.metadata.id);
 
-    db.collection(FM_STUDY_COLLECTION).updateOne({_id: object_id}, experiment_data, (err, doc) => {
+    db.collection(FM_STUDY_COLLECTION).updateOne({_id: object_id}, experiment_data, {upsert: true}, (err, doc) => {
         if (err) {
             handleError(res, err.message, "Failed to insert experiment data");
         } else {
