@@ -310,14 +310,16 @@ async function createExperiment(
                    .concat(demo)
                    .concat(post_demo)
                    .concat(main_loop),
-        plugins: [
-            new lab.plugins.Transmit({
-                url: 'https://qm-fm-study.herokuapp.com/api/save-experiment'
-            })
-        ],
         datastore
     });
-    experiment.on('end', () => ds.commit());
+    experiment.on('end', () => {
+        datastore.transmit(
+            'https://qm-fm-study.herokuapp.com/api/save-experiment',
+            {
+                dataType: 'text/plain'
+            }
+        )
+    });
     return experiment;
 }
 
