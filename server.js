@@ -73,17 +73,5 @@ app.post('/api/save-experiment', function(req, res) {
             }
           }
         }
-      )
-      .updateOne(
-        {'metadata.id': experiment_data.metadata.id},
-        {$set: experiment_data},
-        {upsert: true},
-        (err, doc) => {
-          if (err) {
-              handleError(res, err.message, "Failed to insert experiment data");
-          } else {
-              res.status(201);
-              console.log("Successfully stored experiment data");
-          }
-    });
+      );
 });
