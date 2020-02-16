@@ -37,17 +37,20 @@ app.get('/api/test', function(req, res) {
 
 app.post('/api/save-experiment', function(req, res) {
     const experiment_data = req.body;
-    delete experiment_data._id;
 
     experiment_data.creationData = new Date();
-    const object_id = new ObjectID(experiment_data.metadata.id);
 
-    db.collection(FM_STUDY_COLLECTION).updateOne({_id: object_id}, experiment_data, {upsert: true}, (err, doc) => {
-        if (err) {
-            handleError(res, err.message, "Failed to insert experiment data");
-        } else {
-            res.status(201).json(doc.ops[0]);
-            console.log("Successfully stored experiment data");
-        }
+    db.collection(FM_STUDY_COLLECTION)
+      .updateOne(
+        {'metadata.id': experiment_data.metadata.id},
+        experiment_data,
+        {upsert: true},
+        (err, doc) => {
+          if (err) {
+              handleError(res, err.message, "Failed to insert experiment data");
+          } else {
+              res.status(201).json(doc.ops[0]);
+              console.log("Successfully stored experiment data");
+          }
     });
 });
