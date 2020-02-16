@@ -290,6 +290,7 @@ async function createExperiment(
     semantic_prompts,
     semantic_descriptors) 
 {
+    const datastore = new lab.data.Store();
     const experiment_text = await getExperimentText();
     const introduction =
         createExperimentScreens(experiment_text.pre_demo_screens);
@@ -308,8 +309,15 @@ async function createExperiment(
         content: [].concat(introduction)
                    .concat(demo)
                    .concat(post_demo)
-                   .concat(main_loop)
+                   .concat(main_loop),
+        plugins: [
+            new lab.plugins.Transmit({
+                url: 'https://qm-fm-study.herokuapp.com/api/save-experiment'
+            })
+        ],
+        datastore
     });
+    experiment.on('end', () => ds.commit());
     return experiment;
 }
 
