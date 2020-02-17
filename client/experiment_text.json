@@ -58,5 +58,13 @@
             "<span><p>You will be asked to create 10 sounds. Once you are done, you will be asked a few short questions.</p>",
             "<p>The experiment will begin on the next screen. <b>When you are ready, press any key to start.</b></p></span>"
         ]
+    ],
+    "post_experiment_screens": [
+        [
+            "<span><p>The synthesis portion of the experiment is now complete.</p>",
+            "<p>On the following screen, you will be asked a few short questions about yourself.</p>",
+            "<p>Please answer these to the best of your ability.</p>",
+            "<p><b>When you are ready to continue, please press any key to move to the next screen</b></p></span>"
+        ]
     ]
 }

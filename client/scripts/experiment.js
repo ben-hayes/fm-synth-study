@@ -259,17 +259,11 @@ async function createSynthDemo(fm_synth, fm_synth_ui) {
     return synth_screen;
 }
 
-async function createIntroductionScreens() {
-    const intro_data = await fetch('experiment_text.json');
-    const intro_prompts = JSON.parse(await intro_data.text());
-    const screens = [];
-    for (let screen of intro_prompts.pre_demo_screens) {
-        screens.push(new lab.html.Screen({
-            content: screen.join(''),
-            responses:{ keypress: 'confirm' }
-        }));
-    }
-    return screens;
+async function createMSIScreen() {
+    const msi_data = await fetch('questionnaire_interface.html');
+    const msi_html = await msi_data.text();
+
+    return new lab.html.Form({content: msi_html});
 }
 
 function createExperimentScreens(text_list) {
@@ -303,6 +297,9 @@ async function createExperiment(
     const demo = await createSynthDemo(fm_synth, fm_synth_ui);
     const post_demo =
         createExperimentScreens(experiment_text.post_demo_screens);
+    const post_experiment =
+        createExperimentScreens(experiment_text.post_experiment_screens);
+    const msi_screen = await createMSIScreen();
 
     const main_loop = await createMainLoop(
         fm_synth,
@@ -315,7 +312,9 @@ async function createExperiment(
         content: [].concat(introduction)
                    .concat(demo)
                    .concat(post_demo)
-                   .concat(main_loop),
+                   .concat(main_loop)
+                   .concat(post_experiment)
+                   .concat(msi_screen),
         plugins: [
             new lab.plugins.Transmit({
                 url: 'https://qm-fm-study.herokuapp.com/api/save-experiment',
