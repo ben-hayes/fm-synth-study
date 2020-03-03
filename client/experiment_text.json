@@ -42,8 +42,8 @@
         [
             "<span><p>On the next screen, you will be able to practice making a sound with the synthesiser.</p>",
             "<p>Please take as much time as you need to familiarise yourself with the controls.</p>",
-            "<p>You can play notes using the piano keyboard at the bottom of the screen.</p>",
-            "<p>You can also use your computer keyboard. The keys in the row from from A-L correspond to the white notes, and the keys W, E, T, Y, U and O correspond to the black notes. You can use the Z and X keys to change octave.</p>",
+            "<p>You can play the sound you have <b>created</b> by pressing the <em>C</em> key on your keyboard.</p>",
+            "<p>Pressing the <em>R</em> key will play back the starting sound (the <b>reference</b> sound).</p>",
             "<p>Once you are finished, you can click the submit button to move on.</p>",
             "<p><b>When you are ready to continue, please press any key to move to the next screen</b></p></span>"
         ]
@@ -55,7 +55,8 @@
             "<p><b>When you are ready to continue, please press any key to move to the next screen</b></p></span>"
         ],
         [
-            "<span><p>You will be asked to create 10 sounds. Once you are done, you will be asked a few short questions.</p>",
+            "<span><p>You will be asked to create 9 sounds. Once you are done, you will be asked a few short questions.</p>",
+            "<span><p>Remember, the <em>C</em> key plays back the sound you have <b>created</b> and the <em>R</em> key plays back the <b>reference</b> sound.</p>",
             "<p>The experiment will begin on the next screen. <b>When you are ready, press any key to start.</b></p></span>"
         ]
     ],

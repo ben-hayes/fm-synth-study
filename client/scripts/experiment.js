@@ -59,11 +59,13 @@ async function createMainSequence(
                 index),
             await createPromptRatingScreen(
                 fm_synth,
+                note,
                 param_snapshot,
                 param_store,
                 prompt_text),
             await createDescriptorRatingScreen(
                 fm_synth,
+                note,
                 param_snapshot,
                 param_store,
                 semantic_prompt,
@@ -75,6 +77,7 @@ async function createMainSequence(
 
 async function createPromptRatingScreen(
     fm_synth,
+    note,
     param_snapshot,
     param_store,
     semantic_prompt)
@@ -92,6 +95,7 @@ async function createPromptRatingScreen(
 
     activateRatingScreenSynth(
         fm_synth,
+        note,
         param_snapshot,
         param_store,
         rating_screen);
@@ -119,6 +123,7 @@ function createPromptText(semantic_prompt) {
 
 async function createDescriptorRatingScreen(
     fm_synth,
+    note,
     param_snapshot,
     param_store,
     semantic_prompt,
@@ -144,6 +149,7 @@ async function createDescriptorRatingScreen(
 
         activateRatingScreenSynth(
             fm_synth,
+            note,
             param_snapshot,
             param_store,
             rating_screen);
@@ -185,23 +191,25 @@ function createDescriptorRows (semantic_descriptors, semantic_prompt) {
 
 function activateRatingScreenSynth(
     fm_synth,
+    note,
     param_snapshot,
     param_store,
     rating_screen) 
 {
+    const {keyDownListener, keyUpListener} = createKeyboardCallbacks(
+        fm_synth,
+        note,
+        param_snapshot,
+        () => param_store
+    );
     rating_screen.on('run', () => {
-        document.getElementById('play-new').onclick = () => {
-            fm_synth.setAllParams(param_store);
-            fm_synth.playNoteWithEnvLengths(53, 0.0625, 2);
-        };
-        document.getElementById('play-ref').onclick = () => {
-            fm_synth.setAllParams(param_snapshot);
-            fm_synth.playNoteWithEnvLengths(53, 0.0625, 2);
-        };
-        document.getElementById('submit').onclick = () => {
-            fm_synth.endNote();
-        };
+        document.addEventListener('keydown', keyDownListener);
+        document.addEventListener('keyup', keyUpListener);
     });
+    rating_screen.on('end', () => {
+        document.removeEventListener('keydown', keyDownListener);
+        document.removeEventListener('keyup', keyUpListener);
+    })
 }
 
 function createKeyboardCallbacks(
@@ -218,11 +226,13 @@ function createKeyboardCallbacks(
         held_keys[key] = true;
 
         if (key == 'c') {
+            fm_synth.change_param_allowed = true;
             fm_synth.setAllParams(get_params_callback());
             fm_synth.startNote(note);
         } else if (key == 'r')
         {
             fm_synth.setAllParams(param_snapshot);
+            fm_synth.change_param_allowed = false;
             fm_synth.startNote(note);
         }
     };
@@ -231,6 +241,7 @@ function createKeyboardCallbacks(
         held_keys[key] = false;
 
         if (key == 'c' || key == 'r') {
+            fm_synth.change_param_allowed = true;
             fm_synth.endNote();
         }
     }

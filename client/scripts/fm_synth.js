@@ -19,6 +19,8 @@
 
 define(['./fm_synth_node'], function (FMSynthNode) {
 return class FMSynth {
+    change_param_allowed = true;
+
     constructor(audioContext) {
         this.context_ = audioContext;
         this.initialized_ = false;
@@ -36,12 +38,15 @@ return class FMSynth {
     }
 
     setParam(paramName, value, rampTime) {
-        this.node_.parameters.get(paramName).value = value;
+        if (this.change_param_allowed)
+            this.node_.parameters.get(paramName).value = value;
     }
 
     setAllParams(paramStates, rampTime) {
-        for (let param in paramStates) {
-            this.node_.parameters.get(param).value = paramStates[param];
+        if (this.change_param_allowed) {
+            for (let param in paramStates) {
+                this.node_.parameters.get(param).value = paramStates[param];
+            }
         }
     }
 
