@@ -19,8 +19,10 @@ async function createMainLoop(fm_synth,
     for (let i = 0; i < trials.length; i++) {
         const param_snapshot = trials[i].synth_preset;
         const semantic_prompt = trials[i].semantic_prompt;
+        const note = trials[i].note_pitch;
         const sequence = await createMainSequence(
                 fm_synth,
+                note,
                 fm_synth_ui,
                 param_snapshot,
                 semantic_prompt,
@@ -34,6 +36,7 @@ async function createMainLoop(fm_synth,
 
 async function createMainSequence(
     fm_synth,
+    note,
     fm_synth_ui,
     param_snapshot,
     semantic_prompt,
@@ -48,6 +51,7 @@ async function createMainSequence(
         content: [
             await createSynthScreen(
                 fm_synth,
+                note,
                 fm_synth_ui,
                 param_snapshot,
                 param_store,
@@ -200,8 +204,44 @@ function activateRatingScreenSynth(
     });
 }
 
+function createKeyboardCallbacks(
+        fm_synth,
+        note,
+        param_snapshot,
+        get_params_callback) {
+    
+    const held_keys = {};
+    const keyDownListener = (event) => {
+        const key = event.key;
+
+        if (held_keys[key]) return;
+        held_keys[key] = true;
+
+        if (key == 'c') {
+            fm_synth.setAllParams(get_params_callback());
+            fm_synth.startNote(note);
+        } else if (key == 'r')
+        {
+            fm_synth.setAllParams(param_snapshot);
+            fm_synth.startNote(note);
+        }
+    };
+    const keyUpListener = (event) => {
+        const key = event.key;
+        held_keys[key] = false;
+
+        if (key == 'c' || key == 'r') {
+            fm_synth.endNote();
+        }
+    }
+
+    return {keyDownListener, keyUpListener};
+
+}
+
 async function createSynthScreen(
     fm_synth,
+    note,
     fm_synth_ui,
     param_snapshot,
     param_store,
@@ -215,22 +255,29 @@ async function createSynthScreen(
     });
 
     let ui;
+
+    const {keyDownListener, keyUpListener} = createKeyboardCallbacks(
+        fm_synth,
+        note,
+        param_snapshot,
+        () => {
+            return fm_synth_ui.getAllParams(ui)
+        });
+
     synth_screen.on('run', () => {
-        ui = fm_synth_ui.startSynthUI(
-            fm_synth.setParam.bind(fm_synth),
-            keyboard_event => {
-                if (keyboard_event.state) {
-                    fm_synth.startNote(keyboard_event.note);
-                } else {
-                    fm_synth.endNote();
-                }
-            });
+        ui = fm_synth_ui.startSynthUI(fm_synth.setParam.bind(fm_synth));
         fm_synth.setAllParams(param_snapshot);
         fm_synth_ui.setAllParams(param_snapshot, ui);
+
+        document.addEventListener('keydown', keyDownListener);
+        document.addEventListener('keyup', keyUpListener);
     });
     synth_screen.on('end', () => {
         Object.assign(param_store, fm_synth.getAllParams());
         fm_synth_ui.cleanupSynthUI(ui);
+
+        document.removeEventListener('keydown', keyDownListener);
+        document.removeEventListener('keyup', keyUpListener);
     });
 
 
@@ -244,19 +291,26 @@ async function createSynthDemo(fm_synth, fm_synth_ui) {
         id: "synth_demo"
     });
     let ui;
+
+    const {keyDownListener, keyUpListener} = createKeyboardCallbacks(
+        fm_synth,
+        48,
+        {},
+        () => {
+            return fm_synth_ui.getAllParams(ui)
+        });
+
     synth_screen.on('run', () => {
-        ui = fm_synth_ui.startSynthUI(
-            fm_synth.setParam.bind(fm_synth),
-            keyboard_event => {
-                if (keyboard_event.state) {
-                    fm_synth.startNote(keyboard_event.note);
-                } else {
-                    fm_synth.endNote();
-                }
-            });
+        ui = fm_synth_ui.startSynthUI(fm_synth.setParam.bind(fm_synth));
+
+        document.addEventListener('keydown', keyDownListener);
+        document.addEventListener('keyup', keyUpListener);
     });
     synth_screen.on('end', () => {
         fm_synth_ui.cleanupSynthUI(ui);
+
+        document.removeEventListener('keydown', keyDownListener);
+        document.removeEventListener('keyup', keyUpListener);
     });
 
 

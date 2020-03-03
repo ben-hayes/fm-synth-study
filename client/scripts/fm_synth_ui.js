@@ -154,7 +154,7 @@ const keyboard_map = {
     p: 15,
 };
 
-function startSynthUI(parameterChangeCallback, keyboardChangeCallback) {
+function startSynthUI(parameterChangeCallback) {
     const ui = [];
 
     let operator_index = 0;
@@ -208,44 +208,6 @@ function startSynthUI(parameterChangeCallback, keyboardChangeCallback) {
         operator_index += 1;
     }
 
-    const kb_low = 36;
-    const kb_high = 72;
-
-    ui.keyboard = new Nexus.Piano("#keyboard", {
-        lowNote: kb_low,
-        highNote: kb_high
-    });
-    ui.keyboard.on('change', keyboardChangeCallback);
-
-    let octave = 48;
-    const held_keys = {};
-
-    document.addEventListener('keydown', event => {
-        const key_name = event.key;
-
-        if (key_name === 'z') octave -= octave < kb_low + 12 ? 0 : 12;
-        if (key_name === 'x') octave += octave > kb_high - 12 ? 0 : 12;
-        if (key_name in keyboard_map && !held_keys[key_name]) {
-            const note = octave + keyboard_map[key_name];
-            if (note >= kb_low && note <= kb_high) {
-                ui.keyboard.toggleKey(note, true);
-            }
-        }
-
-        held_keys[key_name] = true;
-    });
-    document.addEventListener('keyup', event => {
-        const key_name = event.key;
-        held_keys[key_name] = false;
-
-        if (key_name in keyboard_map) {
-            const note = octave + keyboard_map[key_name];
-            if (note >= kb_low && note <= kb_high) {
-                ui.keyboard.toggleKey(note, false);
-            }
-        } 
-    });
-
     return ui;
 }
 
@@ -267,6 +229,19 @@ function setAllParams(param_map, ui) {
     }
 }
 
+function getAllParams(ui) {
+    const param_map = {};
+    for (let i = 0; i < ui.length; i++) {
+        const operator = ui[i];
+        for (let param in operator) {
+            if (param.includes('num') || param.includes('adsr')) continue;
+            const name = param + '_' + (i + 1);
+            param_map[name] = operator[param].value;
+        }
+    }
+    return param_map;
+}
+
 async function getSynthHTML() {
     const synthData = await fetch('./synth_interface.html');
     const synthHtml = await synthData.text();
@@ -278,6 +253,7 @@ return {
     getSynthHTML,
     startSynthUI,
     cleanupSynthUI,
-    setAllParams
+    setAllParams,
+    getAllParams
 };
 })
