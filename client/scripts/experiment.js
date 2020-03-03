@@ -295,7 +295,7 @@ async function createSynthDemo(fm_synth, fm_synth_ui) {
     const {keyDownListener, keyUpListener} = createKeyboardCallbacks(
         fm_synth,
         48,
-        {},
+        fm_synth_ui.default_param_map,
         () => {
             return fm_synth_ui.getAllParams(ui)
         });

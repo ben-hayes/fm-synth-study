@@ -2,6 +2,31 @@ define(function() {
 //
 // Settings for Nexus UI controls
 //
+
+const default_param_map = {
+    attack_1: 0.15,
+    decay_1: 0.25,
+    sustain_1: 0.4,
+    release_1: 0.3,
+    coarse_1: 1.0,
+    fine_1: 0.0,
+    gain_1: 0.7,
+    attack_2: 0.15,
+    decay_2: 0.25,
+    sustain_2: 0.4,
+    release_2: 0.3,
+    coarse_2: 1.0,
+    fine_2: 0.0,
+    gain_2: 0.7,
+    attack_3: 0.15,
+    decay_3: 0.25,
+    sustain_3: 0.4,
+    release_3: 0.3,
+    coarse_3: 1.0,
+    fine_3: 0.0,
+    gain_3: 0.7,
+};
+
 const dial_settings = {
     size: [60, 60],
     interaction: 'vertical',
@@ -254,6 +279,7 @@ return {
     startSynthUI,
     cleanupSynthUI,
     setAllParams,
-    getAllParams
+    getAllParams,
+    default_param_map
 };
 })
