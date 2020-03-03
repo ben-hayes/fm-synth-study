@@ -12,14 +12,13 @@ requirejs.config({
 define(['lab'], function(lab) {
 async function createMainLoop(fm_synth,
     fm_synth_ui,
-    synth_presets,
-    semantic_prompts,
+    trials,
     semantic_descriptors)
 {
     const sequences = [];
-    for (let i = 0; i < synth_presets.length; i++) {
-        const param_snapshot = synth_presets[i];
-        const semantic_prompt = semantic_prompts[i];
+    for (let i = 0; i < trials.length; i++) {
+        const param_snapshot = trials[i].synth_preset;
+        const semantic_prompt = trials[i].semantic_prompt;
         const sequence = await createMainSequence(
                 fm_synth,
                 fm_synth_ui,
@@ -29,8 +28,7 @@ async function createMainLoop(fm_synth,
                 i);
         sequences.push(sequence);
     }
-    for (let param_snapshot of synth_presets) {
-    }
+
     return sequences;
 }
 
@@ -101,11 +99,7 @@ function createPromptRow(semantic_prompt) {
     return `
             <tr>
                 <td>Not much ${semantic_prompt}</td>
-                <td class="input_cell"><input type="radio" name="${semantic_prompt}" value="0"></td>
-                <td class="input_cell"><input type="radio" name="${semantic_prompt}" value="1"></td>
-                <td class="input_cell"><input type="radio" name="${semantic_prompt}" value="2"></td>
-                <td class="input_cell"><input type="radio" name="${semantic_prompt}" value="3"></td>
-                <td class="input_cell"><input type="radio" name="${semantic_prompt}" value="4"></td>
+                <td colspan="5"><input type="range" name="${semantic_prompt}" value="0" min="-10" max="10" step="0.1" style="width: 400px"></td>
                 <td>Much ${semantic_prompt}</td>
             </tr>
         `;
@@ -124,26 +118,40 @@ async function createDescriptorRatingScreen(
     param_snapshot,
     param_store,
     semantic_prompt,
-    semantic_descriptors) 
+    semantic_descriptors,
+    batch_size) 
 {
+    const batch = batch_size || 10;
     const rating_screen_data = await fetch('rating_interface.html');
     const rating_screen_html = await rating_screen_data.text();
     const text = createDescriptorText();
-    const rows = createDescriptorRows(semantic_descriptors, semantic_prompt);
-    const rating_screen = new lab.html.Form({
-        content: rating_screen_html
-                    .replace('<%ROWS%>', rows)
-                    .replace('<%TEXT%>', text)
-                    .replace('<%MIDDLE_TEXT%>', 'About the same')
+    const screens = [];
+
+    for (let i = 0; i < Math.floor(semantic_descriptors.length / batch); i++) {
+        const descriptor_batch =
+            semantic_descriptors.slice(i * batch, (i + 1) * batch);
+        const rows = createDescriptorRows(descriptor_batch, semantic_prompt);
+        const rating_screen = new lab.html.Form({
+            content: rating_screen_html
+                        .replace('<%ROWS%>', rows)
+                        .replace('<%TEXT%>', text)
+                        .replace('<%MIDDLE_TEXT%>', 'About the same')
+        });
+
+        activateRatingScreenSynth(
+            fm_synth,
+            param_snapshot,
+            param_store,
+            rating_screen);
+
+        screens.push(rating_screen);
+    }
+
+    const rating_screens = new lab.flow.Sequence({
+        content: screens,
     });
 
-    activateRatingScreenSynth(
-        fm_synth,
-        param_snapshot,
-        param_store,
-        rating_screen);
-
-    return rating_screen;
+    return rating_screens;
 }
 
 function createDescriptorText() {
@@ -161,11 +169,7 @@ function createDescriptorRows (semantic_descriptors, semantic_prompt) {
             const row = `
                 <tr>
                     <td>Much ${descriptor.less}</td>
-                    <td class="input_cell"><input type="radio" name="${descriptor.name}" value="-2"></td>
-                    <td class="input_cell"><input type="radio" name="${descriptor.name}" value="-1"></td>
-                    <td class="input_cell"><input type="radio" name="${descriptor.name}" value="0"></td>
-                    <td class="input_cell"><input type="radio" name="${descriptor.name}" value="1"></td>
-                    <td class="input_cell"><input type="radio" name="${descriptor.name}" value="2"></td>
+                    <td colspan="5"><input type="range" name="${semantic_prompt}" value="0" min="-10" max="10" step="0.1" style="width: 400px"></td>
                     <td>Much ${descriptor.more}</td>
                 </tr>
             `;
@@ -286,8 +290,7 @@ async function getExperimentText() {
 async function createExperiment(
     fm_synth,
     fm_synth_ui,
-    synth_presets,
-    semantic_prompts,
+    trials,
     semantic_descriptors) 
 {
     const datastore = new lab.data.Store();
@@ -304,8 +307,7 @@ async function createExperiment(
     const main_loop = await createMainLoop(
         fm_synth,
         fm_synth_ui,
-        synth_presets,
-        semantic_prompts,
+        trials,
         semantic_descriptors);
 
     const experiment = new lab.flow.Sequence({

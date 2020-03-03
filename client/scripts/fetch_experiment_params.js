@@ -1,39 +1,148 @@
 define(function() {
 function fetchExperimentParams(num_samples) {
-    const synth_params = [];
     const semantic_descriptors = [
         {
-            name: 'brightness',
-            less: 'less bright',
-            more: 'brighter'
+            name: 'sharpness',
+            more: 'sharper',
+            less: 'less sharp',
         },
         {
-            name: 'darkness',
-            less: 'less dark',
-            more: 'darker'
+            name: 'dirtiness',
+            more: 'dirtier',
+            less: 'less dirty',
+        },
+        {
+            name: 'aggressiveness',
+            more: 'more aggressive',
+            less: 'less aggressive',
+        },
+        {
+            name: 'richness',
+            more: 'richer',
+            less: 'less rich',
         },
         {
             name: 'metallicness',
+            more: 'more metallic',
             less: 'less metallic',
-            more: 'more metallic'
-        }
-    ];
-    const semantic_prompts = [
-        {
-            descriptor_index: 2,
-            direction: 'less'
         },
         {
-            descriptor_index: 1,
-            direction: 'more'
+            name: 'pureness',
+            more: 'purer',
+            less: 'less pure',
         },
         {
-            descriptor_index: 0,
-            direction: 'more'
-        }
+            name: 'rawness',
+            more: 'more raw',
+            less: 'less raw',
+        },
+        {
+            name: 'sterileness',
+            more: 'more sterile',
+            less: 'less sterile',
+        },
+        {
+            name: 'darkness',
+            more: 'darker',
+            less: 'less dark',
+        },
+        {
+            name: 'bigness',
+            more: 'bigger',
+            less: 'less big',
+        },
+        {
+            name: 'harshness',
+            more: 'harsher',
+            less: 'less harsh',
+        },
+        {
+            name: 'softness',
+            more: 'softer',
+            less: 'less soft',
+        },
+        {
+            name: 'woodiness',
+            more: 'more woody',
+            less: 'less woody',
+        },
+        {
+            name: 'hardness',
+            more: 'harder',
+            less: 'less hard',
+        },
+        {
+            name: 'smoothness',
+            more: 'smoother',
+            less: 'less smooth',
+        },
+        {
+            name: 'punchiness',
+            more: 'punchier',
+            less: 'less punchy',
+        },
+        {
+            name: 'mellowness',
+            more: 'mellower',
+            less: 'less mellow',
+        },
+        {
+            name: 'brightness',
+            more: 'brighter',
+            less: 'less bright',
+        },
+        {
+            name: 'thickness',
+            more: 'thicker',
+            less: 'less thick',
+        },
+        {
+            name: 'roughness',
+            more: 'rougher',
+            less: 'less rough',
+        },
     ];
-    for (let i = 0; i < num_samples; i++) {
-        synth_params.push({
+    const trials = [
+        {
+            semantic_prompt: {
+                descriptor_index: 0,
+                direction: 'less',
+            },
+            note_pitch: 36,
+            synth_preset: {
+            }
+        },
+        {
+            semantic_prompt: {
+                descriptor_index: 1,
+                direction: 'more',
+            },
+            note_pitch: 36,
+            synth_preset: {
+            }
+        },
+        {
+            semantic_prompt: {
+                descriptor_index: 2,
+                direction: 'less',
+            },
+            note_pitch: 60,
+            synth_preset: {
+            }
+        },
+        {
+            semantic_prompt: {
+                descriptor_index: 1,
+                direction: 'less',
+            },
+            note_pitch: 72,
+            synth_preset: {
+            }
+        },
+    ]
+
+    for (let trial in trials) {
+        trials[trial].synth_preset = {
             'coarse_1': Math.ceil(Math.random() * 48),
             'fine_1': Math.floor (Math.random() * 999 - 499),
             'gain_1': Math.random(),
@@ -55,12 +164,11 @@ function fetchExperimentParams(num_samples) {
             'decay_3': Math.random(),
             'sustain_3': Math.random(),
             'release_3': Math.random()
-        });
+        };
     }
     return {
-        synth_params,
+        trials,
         semantic_descriptors,
-        semantic_prompts
     };
 }
 
