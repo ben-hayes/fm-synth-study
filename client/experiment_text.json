@@ -68,5 +68,11 @@
             "<p>Please answer these to the best of your ability.</p>",
             "<p><b>When you are ready to continue, please press any key to move to the next screen</b></p></span>"
         ]
+    ],
+    "post_questionnaire_screens": [
+        [
+            "<span><p>The experiment is now complete. Thank you for taking part.</p>",
+            "<p><b>It is now safe to close your browser tab.</b></p></span>"
+        ]
     ]
 }

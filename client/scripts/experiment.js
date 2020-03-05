@@ -368,6 +368,8 @@ async function createExperiment(
     const post_experiment =
         createExperimentScreens(experiment_text.post_experiment_screens);
     const msi_screen = await createMSIScreen();
+    const post_questionnaire =
+        createExperimentScreens(experiment_text.post_questionnaire_screens);
 
     const main_loop = await createMainLoop(
         fm_synth,
@@ -381,7 +383,8 @@ async function createExperiment(
                    .concat(post_demo)
                    .concat(main_loop)
                    .concat(post_experiment)
-                   .concat(msi_screen),
+                   .concat(msi_screen)
+                   .concat(post_questionnaire),
         plugins: [
             new lab.plugins.Transmit({
                 url: 'https://qm-fm-study.herokuapp.com/api/save-experiment',
