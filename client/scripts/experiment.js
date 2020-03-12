@@ -10,7 +10,9 @@ requirejs.config({
 });
 
 define(['lab'], function(lab) {
-const TRANSMIT_URL = 'https://qm-fm-study.herokuapp.com/api/save-synth-patch';
+const TRANSMIT_SYNTH_URL = 'https://qm-fm-study.herokuapp.com/api/save-synth-patch';
+const TRANSMIT_MSI_URL = 'https://qm-fm-study.herokuapp.com/api/save-questionnaire';
+
 async function createMainLoop(fm_synth,
     fm_synth_ui,
     trials,
@@ -53,7 +55,6 @@ async function createMainSequence(
                             [semantic_prompt.descriptor_index]
                             [semantic_prompt.direction];
     const sequence = new lab.flow.Sequence({
-        datastore: data_store,
         content: [
             await createSynthScreen(
                 fm_synth,
@@ -63,7 +64,8 @@ async function createMainSequence(
                 param_store,
                 prompt_text,
                 index,
-                participant_id),
+                participant_id,
+                data_store),
             await createPromptRatingScreen(
                 fm_synth,
                 note,
@@ -71,7 +73,8 @@ async function createMainSequence(
                 param_store,
                 prompt_text,
                 index,
-                participant_id),
+                participant_id,
+                data_store),
             await createDescriptorRatingScreen(
                 fm_synth,
                 note,
@@ -81,14 +84,18 @@ async function createMainSequence(
                 semantic_descriptors,
                 9,
                 index,
-                participant_id),
+                participant_id,
+                data_store),
         ],
         title: `synth_descriptor_sequence_${index}`
     });
     sequence.on('end', () => {
-        data_store.transmit(TRANSMIT_URL, {participant_id})
+        data_store.transmit(TRANSMIT_SYNTH_URL, {participant_id})
             .then(response => {
                 if(!response.ok) {
+                    alert("Unfortunately there was a problem uploading your "
+                        + "response. Please save the data file and send this to"
+                        + " b.j.hayes@se19.qmul.ac.uk.");
                     data_store.download();
                 }
             });
@@ -103,7 +110,8 @@ async function createPromptRatingScreen(
     param_store,
     semantic_prompt,
     index,
-    participant_id)
+    participant_id,
+    data_store)
 {
     const rating_screen_data = await fetch('rating_interface.html');
     const rating_screen_html = await rating_screen_data.text();
@@ -111,14 +119,17 @@ async function createPromptRatingScreen(
     const row = createPromptRow(semantic_prompt);
     const rating_screen = new lab.html.Form({
         id: `prompt_${index}`,
-        title: `prompt_${index}`,
+        title: `prompt`,
         content: rating_screen_html
                     .replace('<%ROWS%>', row)
                     .replace('<%TEXT%>', text)
                     .replace('<%MIDDLE_TEXT%>', `Somewhat ${semantic_prompt}`),
         parameters: {
             participant_id
-        }
+        },
+    });
+    rating_screen.on('prepare', () => {
+        rating_screen.options.datastore = data_store;
     });
 
     activateRatingScreenSynth(
@@ -135,7 +146,7 @@ function createPromptRow(semantic_prompt) {
     return `
             <tr>
                 <td>Not much ${semantic_prompt}</td>
-                <td colspan="5"><input type="range" name="${semantic_prompt}" value="0" min="-10" max="10" step="0.1" style="width: 400px"></td>
+                <td colspan="5"><input type="range" name="prompt_${semantic_prompt}" value="0" min="-10" max="10" step="0.1" style="width: 400px"></td>
                 <td>Much ${semantic_prompt}</td>
             </tr>
         `;
@@ -158,7 +169,8 @@ async function createDescriptorRatingScreen(
     semantic_descriptors,
     batch_size,
     index,
-    participant_id) 
+    participant_id,
+    data_store) 
 {
     const batch = batch_size || 10;
     const rating_screen_data = await fetch('rating_interface.html');
@@ -172,14 +184,17 @@ async function createDescriptorRatingScreen(
         const rows = createDescriptorRows(descriptor_batch, semantic_prompt);
         const rating_screen = new lab.html.Form({
             id: `descriptor_${index}`,
-            title: `descriptor_${index}`,
+            title: `descriptor`,
             content: rating_screen_html
                         .replace('<%ROWS%>', rows)
                         .replace('<%TEXT%>', text)
                         .replace('<%MIDDLE_TEXT%>', 'About the same'),
             parameters: {
                 participant_id
-            }
+            },
+        });
+        rating_screen.on('prepare', () => {
+            rating_screen.options.datastore = data_store;
         });
 
         activateRatingScreenSynth(
@@ -214,7 +229,7 @@ function createDescriptorRows (semantic_descriptors, semantic_prompt) {
             const row = `
                 <tr>
                     <td>Much ${descriptor.less}</td>
-                    <td colspan="5"><input type="range" name="${descriptor.name}" value="0" min="-10" max="10" step="0.1" style="width: 400px"></td>
+                    <td colspan="5"><input type="range" name="descriptor_${descriptor.name}" value="0" min="-10" max="10" step="0.1" style="width: 400px"></td>
                     <td>Much ${descriptor.more}</td>
                 </tr>
             `;
@@ -293,16 +308,20 @@ async function createSynthScreen(
     param_store,
     semantic_prompt,
     index,
-    participant_id) 
+    participant_id,
+    data_store) 
 {
     const synth_html = await fm_synth_ui.getSynthHTML();
     const synth_screen = new lab.html.Form({
         content: synth_html.replace('<%PROMPT%>', `Please edit the synth parameters to make this sound <em>${semantic_prompt}</em>`),
         id: `synth_${index}`,
-        title: `synth_${index}`,
+        title: `synth`,
         parameters: {
             participant_id
-        }
+        },
+    });
+    synth_screen.on('prepare', () => {
+        synth_screen.options.datastore = data_store;
     });
 
     let ui;
@@ -368,15 +387,30 @@ async function createSynthDemo(fm_synth, fm_synth_ui) {
     return synth_screen;
 }
 
-async function createMSIScreen() {
+async function createMSIScreen(participant_id) {
     const msi_data = await fetch('questionnaire_interface.html');
     const msi_html = await msi_data.text();
-
-    return new lab.html.Form({
+    const data_store = new lab.data.Store();
+    const msi_screen = new lab.html.Form({
         content: msi_html,
         id: 'questionnaire',
         title: 'questionnaire'
     });
+    msi_screen.on('prepare', () => {
+        msi_screen.options.datastore = data_store;
+    });
+    msi_screen.on('end', () => {
+        data_store.transmit(TRANSMIT_MSI_URL, {participant_id})
+            .then(response => {
+                if(!response.ok) {
+                    alert("Unfortunately there was a problem uploading your "
+                        + "response. Please save the data file and send this to"
+                        + " b.j.hayes@se19.qmul.ac.uk.");
+                    data_store.download();
+                }
+            });
+    });
+    return msi_screen;
 }
 
 function createExperimentScreens(text_list) {
@@ -403,7 +437,7 @@ async function createExperiment(
     semantic_descriptors,
     participant_id) 
 {
-    const datastore = new lab.data.Store();
+    //const datastore = new lab.data.Store();
     const experiment_text = await getExperimentText();
     const introduction =
         createExperimentScreens(experiment_text.pre_demo_screens);
@@ -412,7 +446,7 @@ async function createExperiment(
         createExperimentScreens(experiment_text.post_demo_screens);
     const post_experiment =
         createExperimentScreens(experiment_text.post_experiment_screens);
-    const msi_screen = await createMSIScreen();
+    const msi_screen = await createMSIScreen(participant_id);
     const post_questionnaire =
         createExperimentScreens(experiment_text.post_questionnaire_screens);
 
@@ -431,15 +465,6 @@ async function createExperiment(
                    .concat(post_experiment)
                    .concat(msi_screen)
                    .concat(post_questionnaire),
-        plugins: [
-            new lab.plugins.Transmit({
-                url: 'https://qm-fm-study.herokuapp.com/api/save-experiment',
-                updates: {
-                    full: true
-                }
-            })
-        ],
-        datastore
     });
     return experiment;
 }
