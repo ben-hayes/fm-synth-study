@@ -188,7 +188,7 @@ function createDescriptorRows (semantic_descriptors, semantic_prompt) {
             const row = `
                 <tr>
                     <td>Much ${descriptor.less}</td>
-                    <td colspan="5"><input type="range" name="${semantic_prompt}" value="0" min="-10" max="10" step="0.1" style="width: 400px"></td>
+                    <td colspan="5"><input type="range" name="${descriptor.name}" value="0" min="-10" max="10" step="0.1" style="width: 400px"></td>
                     <td>Much ${descriptor.more}</td>
                 </tr>
             `;
