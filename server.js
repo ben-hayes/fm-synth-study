@@ -78,7 +78,7 @@ app.post('/api/save-synth-patch', function(req, res) {
     synth_data.creationDate = new Date();
 
     db.collection(SYNTH_PATCH)
-        .insert(experiment_data, (err, doc) => {
+        .insert(synth_data, (err, doc) => {
           if (err) {
             handleError(res, err.message, "Failed to insert new record");
           } else {
