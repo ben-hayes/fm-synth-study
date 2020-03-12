@@ -3,6 +3,11 @@ requirejs(
     function(FMSynth, fm_synth_ui, experiment, fetchExperimentParams)
 {
     const context = new AudioContext();
+    document.addEventListener('keydown', () => {
+        if (context.state !== 'running') {
+            context.resume();
+        }
+    });
     const synth = new FMSynth(context);
     const {trials, semantic_descriptors} 
         = fetchExperimentParams(3);
