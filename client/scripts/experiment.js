@@ -71,6 +71,7 @@ async function createMainSequence(
                 param_store,
                 semantic_prompt,
                 semantic_descriptors,
+                9,
                 index),
         ]
     });
