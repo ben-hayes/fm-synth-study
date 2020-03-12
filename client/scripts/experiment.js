@@ -14,7 +14,7 @@ async function createMainLoop(fm_synth,
     fm_synth_ui,
     trials,
     semantic_descriptors,
-    pid)
+    participant_id)
 {
     const sequences = [];
     for (let i = 0; i < trials.length; i++) {
@@ -29,7 +29,7 @@ async function createMainLoop(fm_synth,
                 semantic_prompt,
                 semantic_descriptors,
                 i,
-                pid);
+                participant_id);
         sequences.push(sequence);
     }
 
@@ -44,7 +44,7 @@ async function createMainSequence(
     semantic_prompt,
     semantic_descriptors,
     index,
-    pid)
+    participant_id)
 {
     const param_store = {};
     const prompt_text = semantic_descriptors
@@ -60,7 +60,7 @@ async function createMainSequence(
                 param_store,
                 prompt_text,
                 index,
-                pid),
+                participant_id),
             await createPromptRatingScreen(
                 fm_synth,
                 note,
@@ -68,7 +68,7 @@ async function createMainSequence(
                 param_store,
                 prompt_text,
                 index,
-                pid),
+                participant_id),
             await createDescriptorRatingScreen(
                 fm_synth,
                 note,
@@ -78,8 +78,9 @@ async function createMainSequence(
                 semantic_descriptors,
                 9,
                 index,
-                pid),
-        ]
+                participant_id),
+        ],
+        title: `synth_descriptor_sequence_${index}`
     });
     return sequence;
 }
@@ -91,7 +92,7 @@ async function createPromptRatingScreen(
     param_store,
     semantic_prompt,
     index,
-    pid)
+    participant_id)
 {
     const rating_screen_data = await fetch('rating_interface.html');
     const rating_screen_html = await rating_screen_data.text();
@@ -105,7 +106,7 @@ async function createPromptRatingScreen(
                     .replace('<%TEXT%>', text)
                     .replace('<%MIDDLE_TEXT%>', `Somewhat ${semantic_prompt}`),
         parameters: {
-            pid
+            participant_id
         }
     });
 
@@ -146,7 +147,7 @@ async function createDescriptorRatingScreen(
     semantic_descriptors,
     batch_size,
     index,
-    pid) 
+    participant_id) 
 {
     const batch = batch_size || 10;
     const rating_screen_data = await fetch('rating_interface.html');
@@ -166,7 +167,7 @@ async function createDescriptorRatingScreen(
                         .replace('<%TEXT%>', text)
                         .replace('<%MIDDLE_TEXT%>', 'About the same'),
             parameters: {
-                pid
+                participant_id
             }
         });
 
@@ -281,7 +282,7 @@ async function createSynthScreen(
     param_store,
     semantic_prompt,
     index,
-    pid) 
+    participant_id) 
 {
     const synth_html = await fm_synth_ui.getSynthHTML();
     const synth_screen = new lab.html.Form({
@@ -289,7 +290,7 @@ async function createSynthScreen(
         id: `synth_${index}`,
         title: `synth_${index}`,
         parameters: {
-            pid
+            participant_id
         }
     });
 
@@ -389,7 +390,7 @@ async function createExperiment(
     fm_synth_ui,
     trials,
     semantic_descriptors,
-    pid) 
+    participant_id) 
 {
     const datastore = new lab.data.Store();
     const experiment_text = await getExperimentText();
@@ -409,7 +410,7 @@ async function createExperiment(
         fm_synth_ui,
         trials,
         semantic_descriptors,
-        pid);
+        participant_id);
 
     const experiment = new lab.flow.Sequence({
         content: [].concat(introduction)
