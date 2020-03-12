@@ -104,7 +104,7 @@ async function createPromptRatingScreen(
                     .replace('<%ROWS%>', row)
                     .replace('<%TEXT%>', text)
                     .replace('<%MIDDLE_TEXT%>', `Somewhat ${semantic_prompt}`),
-        data: {
+        parameters: {
             pid
         }
     });
@@ -165,7 +165,7 @@ async function createDescriptorRatingScreen(
                         .replace('<%ROWS%>', rows)
                         .replace('<%TEXT%>', text)
                         .replace('<%MIDDLE_TEXT%>', 'About the same'),
-            data: {
+            parameters: {
                 pid
             }
         });
@@ -288,7 +288,7 @@ async function createSynthScreen(
         content: synth_html.replace('<%PROMPT%>', `Please edit the synth parameters to make this sound <em>${semantic_prompt}</em>`),
         id: `synth_${index}`,
         title: `synth_${index}`,
-        data: {
+        parameters: {
             pid
         }
     });
@@ -360,7 +360,11 @@ async function createMSIScreen() {
     const msi_data = await fetch('questionnaire_interface.html');
     const msi_html = await msi_data.text();
 
-    return new lab.html.Form({content: msi_html});
+    return new lab.html.Form({
+        content: msi_html,
+        id: 'questionnaire',
+        title: 'questionnaire'
+    });
 }
 
 function createExperimentScreens(text_list) {
