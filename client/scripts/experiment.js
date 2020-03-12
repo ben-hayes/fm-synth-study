@@ -133,7 +133,8 @@ async function createDescriptorRatingScreen(
     param_store,
     semantic_prompt,
     semantic_descriptors,
-    batch_size) 
+    batch_size,
+    index) 
 {
     const batch = batch_size || 10;
     const rating_screen_data = await fetch('rating_interface.html');
