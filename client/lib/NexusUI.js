@@ -140,14 +140,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	      this[key] = Core[key];
 	    }
 	
-	    var DefaultContext = window.AudioContext || window.webkitAudioContext;
-	    this._context = context || new DefaultContext();
+	    //var DefaultContext = window.AudioContext || window.webkitAudioContext;
+	    //this._context = context || new DefaultContext();
 	
 	    this.tune = new Tune();
 	    this.note = this.tune.note.bind(this.tune);
 	
-	    this.clock = new WAAClock(this._context);
-	    this.clock.start();
+	    //this.clock = new WAAClock(this._context);
+	    //this.clock.start();
 	    this.Interval = Interval;
 	
 	    this.colors = {
