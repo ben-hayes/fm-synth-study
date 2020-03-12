@@ -144,7 +144,7 @@ class FMSynthProcessor extends AudioWorkletProcessor {
         return [
             { name: 'coarse_1', defaultValue: 1.0 },
             { name: 'fine_1', defaultValue: 0.0 },
-            { name: 'gain_1', defaultValue: 0.9 },
+            { name: 'gain_1', defaultValue: 0.7 },
             { name: 'attack_1', defaultValue: 0.01 },
             { name: 'decay_1', defaultValue: 0.1 },
             { name: 'sustain_1', defaultValue: 0.0 },

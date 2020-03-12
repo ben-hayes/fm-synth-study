@@ -66,6 +66,13 @@ Object.assign(release_settings, slider_settings);
 //
 // Define UI spec for one operator
 // 
+const operator_one_spec = {
+    attack: { type: Nexus.Slider, settings: attack_settings },
+    sustain: { type: Nexus.Slider, settings: sustain_settings },
+    decay: { type: Nexus.Slider, settings: decay_settings },
+    release: { type: Nexus.Slider, settings: release_settings },
+    adsr: { type: Nexus.Envelope, settings: adsr_settings },
+};
 const operator_spec = {
     coarse: { type: Nexus.Dial, settings: coarse_settings },
     coarse_num: { type: Nexus.Number, link: 'coarse'},
@@ -84,7 +91,7 @@ const operator_spec = {
 // UI spec for whole synth
 //
 const synth_spec = [
-    Object.assign({}, operator_spec),
+    Object.assign({}, operator_one_spec),
     Object.assign({}, operator_spec),
     Object.assign({}, operator_spec)
 ];

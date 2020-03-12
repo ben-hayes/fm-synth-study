@@ -143,9 +143,6 @@ function fetchExperimentParams(num_samples) {
 
     for (let trial in trials) {
         trials[trial].synth_preset = {
-            'coarse_1': Math.ceil(Math.random() * 48),
-            'fine_1': Math.floor (Math.random() * 999 - 499),
-            'gain_1': Math.random(),
             'attack_1': Math.random(),
             'decay_1': Math.random(),
             'sustain_1': Math.random(),
