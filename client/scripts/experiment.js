@@ -13,7 +13,8 @@ define(['lab'], function(lab) {
 async function createMainLoop(fm_synth,
     fm_synth_ui,
     trials,
-    semantic_descriptors)
+    semantic_descriptors,
+    pid)
 {
     const sequences = [];
     for (let i = 0; i < trials.length; i++) {
@@ -27,7 +28,8 @@ async function createMainLoop(fm_synth,
                 param_snapshot,
                 semantic_prompt,
                 semantic_descriptors,
-                i);
+                i,
+                pid);
         sequences.push(sequence);
     }
 
@@ -41,7 +43,8 @@ async function createMainSequence(
     param_snapshot,
     semantic_prompt,
     semantic_descriptors,
-    index)
+    index,
+    pid)
 {
     const param_store = {};
     const prompt_text = semantic_descriptors
@@ -56,14 +59,16 @@ async function createMainSequence(
                 param_snapshot,
                 param_store,
                 prompt_text,
-                index),
+                index,
+                pid),
             await createPromptRatingScreen(
                 fm_synth,
                 note,
                 param_snapshot,
                 param_store,
                 prompt_text,
-                index),
+                index,
+                pid),
             await createDescriptorRatingScreen(
                 fm_synth,
                 note,
@@ -72,7 +77,8 @@ async function createMainSequence(
                 semantic_prompt,
                 semantic_descriptors,
                 9,
-                index),
+                index,
+                pid),
         ]
     });
     return sequence;
@@ -84,7 +90,8 @@ async function createPromptRatingScreen(
     param_snapshot,
     param_store,
     semantic_prompt,
-    index)
+    index,
+    pid)
 {
     const rating_screen_data = await fetch('rating_interface.html');
     const rating_screen_html = await rating_screen_data.text();
@@ -96,7 +103,10 @@ async function createPromptRatingScreen(
         content: rating_screen_html
                     .replace('<%ROWS%>', row)
                     .replace('<%TEXT%>', text)
-                    .replace('<%MIDDLE_TEXT%>', `Somewhat ${semantic_prompt}`)
+                    .replace('<%MIDDLE_TEXT%>', `Somewhat ${semantic_prompt}`),
+        data: {
+            pid
+        }
     });
 
     activateRatingScreenSynth(
@@ -135,7 +145,8 @@ async function createDescriptorRatingScreen(
     semantic_prompt,
     semantic_descriptors,
     batch_size,
-    index) 
+    index,
+    pid) 
 {
     const batch = batch_size || 10;
     const rating_screen_data = await fetch('rating_interface.html');
@@ -153,7 +164,10 @@ async function createDescriptorRatingScreen(
             content: rating_screen_html
                         .replace('<%ROWS%>', rows)
                         .replace('<%TEXT%>', text)
-                        .replace('<%MIDDLE_TEXT%>', 'About the same')
+                        .replace('<%MIDDLE_TEXT%>', 'About the same'),
+            data: {
+                pid
+            }
         });
 
         activateRatingScreenSynth(
@@ -266,13 +280,17 @@ async function createSynthScreen(
     param_snapshot,
     param_store,
     semantic_prompt,
-    index) 
+    index,
+    pid) 
 {
     const synth_html = await fm_synth_ui.getSynthHTML();
     const synth_screen = new lab.html.Form({
         content: synth_html.replace('<%PROMPT%>', `Please edit the synth parameters to make this sound <em>${semantic_prompt}</em>`),
         id: `synth_${index}`,
-        title: `synth_${index}`
+        title: `synth_${index}`,
+        data: {
+            pid
+        }
     });
 
     let ui;
@@ -366,7 +384,8 @@ async function createExperiment(
     fm_synth,
     fm_synth_ui,
     trials,
-    semantic_descriptors) 
+    semantic_descriptors,
+    pid) 
 {
     const datastore = new lab.data.Store();
     const experiment_text = await getExperimentText();
@@ -385,7 +404,8 @@ async function createExperiment(
         fm_synth,
         fm_synth_ui,
         trials,
-        semantic_descriptors);
+        semantic_descriptors,
+        pid);
 
     const experiment = new lab.flow.Sequence({
         content: [].concat(introduction)
