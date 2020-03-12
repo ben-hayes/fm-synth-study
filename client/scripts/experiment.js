@@ -10,6 +10,7 @@ requirejs.config({
 });
 
 define(['lab'], function(lab) {
+const TRANSMIT_URL = 'https://qm-fm-study.herokuapp.com/api/save-synth-patch';
 async function createMainLoop(fm_synth,
     fm_synth_ui,
     trials,
@@ -46,11 +47,13 @@ async function createMainSequence(
     index,
     participant_id)
 {
+    const data_store = new lab.data.Store()
     const param_store = {};
     const prompt_text = semantic_descriptors
                             [semantic_prompt.descriptor_index]
                             [semantic_prompt.direction];
     const sequence = new lab.flow.Sequence({
+        datastore: data_store,
         content: [
             await createSynthScreen(
                 fm_synth,
@@ -81,6 +84,14 @@ async function createMainSequence(
                 participant_id),
         ],
         title: `synth_descriptor_sequence_${index}`
+    });
+    sequence.on('end', () => {
+        data_store.transmit(TRANSMIT_URL, {participant_id})
+            .then(response => {
+                if(!response.ok) {
+                    data_store.download();
+                }
+            });
     });
     return sequence;
 }

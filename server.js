@@ -3,6 +3,7 @@ const body_parser = require('body-parser');
 const mongodb = require('mongodb');
 
 const FM_STUDY_COLLECTION = 'fm_study';
+const SYNTH_PATCH_COLLECTION = "fm_study_synth_patches"
 
 const app = express();
 app.use(body_parser.json());
@@ -69,4 +70,19 @@ app.post('/api/save-experiment', function(req, res) {
           }
         }
       );
+};
+
+app.post('/api/save-synth-patch', function(req, res) {
+    const synth_data = req.body;
+
+    synth_data.creationDate = new Date();
+
+    db.collection(SYNTH_PATCH)
+        .insert(experiment_data, (err, doc) => {
+          if (err) {
+            handleError(res, err.message, "Failed to insert new record");
+          } else {
+            res.status(201);
+          }
+    });
 });
