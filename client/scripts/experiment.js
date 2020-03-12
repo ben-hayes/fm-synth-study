@@ -62,14 +62,16 @@ async function createMainSequence(
                 note,
                 param_snapshot,
                 param_store,
-                prompt_text),
+                prompt_text,
+                index),
             await createDescriptorRatingScreen(
                 fm_synth,
                 note,
                 param_snapshot,
                 param_store,
                 semantic_prompt,
-                semantic_descriptors),
+                semantic_descriptors,
+                index),
         ]
     });
     return sequence;
@@ -80,13 +82,16 @@ async function createPromptRatingScreen(
     note,
     param_snapshot,
     param_store,
-    semantic_prompt)
+    semantic_prompt,
+    index)
 {
     const rating_screen_data = await fetch('rating_interface.html');
     const rating_screen_html = await rating_screen_data.text();
     const text = createPromptText(semantic_prompt);
     const row = createPromptRow(semantic_prompt);
     const rating_screen = new lab.html.Form({
+        id: `prompt_${index}`,
+        title: `prompt_${index}`,
         content: rating_screen_html
                     .replace('<%ROWS%>', row)
                     .replace('<%TEXT%>', text)
@@ -141,6 +146,8 @@ async function createDescriptorRatingScreen(
             semantic_descriptors.slice(i * batch, (i + 1) * batch);
         const rows = createDescriptorRows(descriptor_batch, semantic_prompt);
         const rating_screen = new lab.html.Form({
+            id: `descriptor_${index}`,
+            title: `descriptor_${index}`,
             content: rating_screen_html
                         .replace('<%ROWS%>', rows)
                         .replace('<%TEXT%>', text)
@@ -262,7 +269,8 @@ async function createSynthScreen(
     const synth_html = await fm_synth_ui.getSynthHTML();
     const synth_screen = new lab.html.Form({
         content: synth_html.replace('<%PROMPT%>', `Please edit the synth parameters to make this sound <em>${semantic_prompt}</em>`),
-        id: `synth_${index}`
+        id: `synth_${index}`,
+        title: `synth_${index}`
     });
 
     let ui;
