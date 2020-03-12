@@ -70,7 +70,7 @@ app.post('/api/save-experiment', function(req, res) {
           }
         }
       );
-};
+});
 
 app.post('/api/save-synth-patch', function(req, res) {
     const synth_data = req.body;
