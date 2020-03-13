@@ -81,6 +81,7 @@ return class FMSynth {
         if (this.using_true_params) this.true_params = this.getAllParams();
 
         this.using_true_params = false;
+
         this.setAllParams(temp_params);
         this.node_.port.postMessage({
             'type': 'note_on',
