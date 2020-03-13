@@ -281,15 +281,10 @@ function createKeyboardCallbacks(
         held_keys[key] = true;
 
         if (key == 'c') {
-            fm_synth.change_param_allowed = true;
-            fm_synth.setAllParams(get_params_callback());
             fm_synth.startNote(note);
         } else if (key == 'r')
         {
-            fm_synth.change_param_allowed = true;
-            fm_synth.setAllParams(param_snapshot);
-            fm_synth.change_param_allowed = false;
-            fm_synth.startNote(note);
+            fm_synth.startNoteWithTempParams(note, param_snapshot);
         }
     };
     const keyUpListener = (event) => {
@@ -339,9 +334,6 @@ async function createSynthScreen(
         () => {
             return fm_synth_ui.getAllParams(ui)
     });
-    const form_listener = () => {
-        fm_synth.setAllParams(fm_synth_ui.getAllParams(ui));
-    };
 
     synth_screen.on('run', () => {
         ui = fm_synth_ui.startSynthUI(fm_synth.setParam.bind(fm_synth));
@@ -350,8 +342,6 @@ async function createSynthScreen(
 
         document.addEventListener('keydown', keyDownListener);
         document.addEventListener('keyup', keyUpListener);
-        document.getElementById('synth_form')
-            .addEventListener('submit', form_listener);
     });
     synth_screen.on('end', () => {
         Object.assign(param_store, fm_synth.getAllParams());
@@ -359,8 +349,6 @@ async function createSynthScreen(
 
         document.removeEventListener('keydown', keyDownListener);
         document.removeEventListener('keyup', keyUpListener);
-        document.getElementById('synth_form')
-            .removeEventListener('submit', form_listener);
     });
 
 

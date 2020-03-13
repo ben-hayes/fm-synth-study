@@ -20,6 +20,8 @@
 define(['./fm_synth_node'], function (FMSynthNode) {
 return class FMSynth {
     change_param_allowed = true;
+    using_true_params = true;
+    true_params = {};
 
     constructor(audioContext) {
         this.context_ = audioContext;
@@ -43,10 +45,10 @@ return class FMSynth {
     }
 
     setAllParams(paramStates, rampTime) {
-        if (this.change_param_allowed) {
-            for (let param in paramStates) {
-                this.node_.parameters.get(param).value = paramStates[param];
-            }
+        this.using_true_params = true;
+        this.change_param_allowed = true;
+        for (let param in paramStates) {
+            this.node_.parameters.get(param).value = paramStates[param];
         }
     }
 
@@ -55,6 +57,9 @@ return class FMSynth {
     }
 
     getAllParams() {
+        if (!this.using_true_params)
+            return this.true_params;
+
         const paramStates = {};
         for (const key of this.node_.parameters.keys()) {
             paramStates[key] = this.node_.parameters.get(key).value;
@@ -63,9 +68,26 @@ return class FMSynth {
     }
 
     startNote(note) {
+        if (!this.using_true_params) {
+            this.setAllParams(this.true_params);
+            this.change_param_allowed = true;
+            this.using_true_params = true;
+        }
+
         this.node_.port.postMessage({
             'type': 'note_on',
             'note': note,
+        });
+    }
+
+    startNoteWithTempParams(note, temp_params) {
+        this.setAllParams(temp_params);
+        this.using_true_params = false;
+        this.change_param_allowed = false;
+        this.true_params = this.getAllParams();
+        this.node_port.postMessage({
+            'type': 'note_on',
+            'note': note
         });
     }
 
