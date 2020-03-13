@@ -43,8 +43,8 @@ return class FMSynth {
             this.node_.parameters.get(paramName).value = value;
     }
 
-    setAllParams(paramStates, rampTime) {
-        this.using_true_params = true;
+    setAllParams(paramStates, is_temp) {
+        this.using_true_params = !(is_temp || false);
         for (let param in paramStates) {
             this.node_.parameters.get(param).value = paramStates[param];
         }
@@ -79,10 +79,9 @@ return class FMSynth {
 
     startNoteWithTempParams(note, temp_params) {
         if (this.using_true_params) this.true_params = this.getAllParams();
-
+        this.setAllParams(temp_params, true);
         this.using_true_params = false;
 
-        this.setAllParams(temp_params);
         this.node_.port.postMessage({
             'type': 'note_on',
             'note': note
