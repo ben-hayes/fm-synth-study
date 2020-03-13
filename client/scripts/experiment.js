@@ -297,6 +297,7 @@ function createKeyboardCallbacks(
 
         if (key == 'c' || key == 'r') {
             fm_synth.change_param_allowed = true;
+            fm_synth.setAllParams(get_params_callback());
             fm_synth.endNote();
         }
     }

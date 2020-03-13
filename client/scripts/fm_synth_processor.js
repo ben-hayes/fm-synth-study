@@ -18,6 +18,7 @@ class ADSR {
         this.release_ = 0.4;
 
         this.releaseAmp_ = 0.0;
+        this.attackAmp_ = 0.0;
         this.lastEnvValue_ = 0.0;
     }
 
@@ -31,6 +32,7 @@ class ADSR {
     attack() {
         this.phase_ = 0;
         this.state_ = ADSRStates.ATTACK;
+        this.attackAmp_ = this.lastEnvValue_;
     }
 
     release() {
@@ -48,7 +50,10 @@ class ADSR {
         switch (this.state_) {
             case ADSRStates.ATTACK:
                 if (this.phase_ < this.attack_) {
-                    envValue = this.phase_ / this.attack_;
+                    envValue =
+                        this.attackAmp_
+                        + (this.phase_ / this.attack_)
+                        * (1.0 - this.attackAmp_);
                     this.phase_ += 1;
                 } else {
                     this.state_ = ADSRStates.DECAY;
