@@ -238,7 +238,7 @@ function createExperimentSpec(db_collection) {
             trials.push(trial);
         }
     }
-    return trials;
+    return {semantic_descriptors: descriptors, trials};
 }
 
 module.exports = createExperimentSpec;

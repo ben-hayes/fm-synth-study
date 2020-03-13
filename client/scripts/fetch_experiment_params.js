@@ -177,7 +177,6 @@ async function fetchExperimentParams() {
     const res = await fetch ("https://qm-fm-study.herokuapp.com/api/get-experiment-spec");
     const text = await res.text();
     const data = JSON.parse(text);
-    console.log(data);
     return data;
 }
 
