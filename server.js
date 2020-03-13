@@ -45,7 +45,7 @@ app.post('/api/save-synth-patch', function(req, res) {
           if (err) {
             handleError(res, err.message, "Failed to insert new record");
           } else {
-            res.status(201);
+            res.sendStatus(201);
           }
     });
 });
@@ -60,7 +60,7 @@ app.post('/api/save-questionnaire', function(req, res) {
           if (err) {
             handleError(res, err.message, "Failed to insert new record");
           } else {
-            res.status(201);
+            res.sendStatus(201);
           }
     });
 });
