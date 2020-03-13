@@ -26,7 +26,6 @@ requirejs(
         }
     });
     const synth = new FMSynth(context);
-    console.log(synth);
     synth.initialize()
         .then(() => {
             return fetchExperimentParams();
