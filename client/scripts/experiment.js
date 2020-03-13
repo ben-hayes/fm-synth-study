@@ -286,6 +286,7 @@ function createKeyboardCallbacks(
             fm_synth.startNote(note);
         } else if (key == 'r')
         {
+            fm_synth.change_param_allowed = true;
             fm_synth.setAllParams(param_snapshot);
             fm_synth.change_param_allowed = false;
             fm_synth.startNote(note);
@@ -296,9 +297,8 @@ function createKeyboardCallbacks(
         held_keys[key] = false;
 
         if (key == 'c' || key == 'r') {
-            fm_synth.change_param_allowed = true;
-            fm_synth.setAllParams(get_params_callback());
             fm_synth.endNote();
+            fm_synth.change_param_allowed = true;
         }
     }
 
