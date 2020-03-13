@@ -71,4 +71,4 @@ app.get('/api/get-experiment-spec', function(req, res) {
             res.setHeader('Content-Type', 'application/json');
             res.end(JSON.stringify(createExperimentSpec(docs)));;
         });
-}):
+});
