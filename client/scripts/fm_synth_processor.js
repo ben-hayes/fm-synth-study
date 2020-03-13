@@ -60,13 +60,14 @@ class ADSR {
 
         switch (this.state_) {
             case ADSRStates.ATTACK:
-                if (this.phase_ < this.attack_) {
+                if (this.lastEnvValue_ < 1 - THRESH) {
                     envValue =
                         this.attackAmp_
-                        + (this.phase_ / this.attack_)
+                        + (this.phase_ / (this.attack_ > 0 ? this.attack_ : 1))
                         * (1.0 - this.attackAmp_);
                     this.phase_ += 1;
                 } else {
+                    console.log(this.lastEnvValue_);
                     this.state_ = ADSRStates.DECAY;
                     this.phase_ = 0;
                     envValue = 1;
@@ -101,8 +102,8 @@ class ADSR {
         }
 
         const diff = envValue - this.lastEnvValue_;
-        if (diff > 0.008) {
-            envValue = this.lastEnvValue_ + diff * 0.008;
+        if (Math.abs(diff) > 0.004) {
+            envValue = this.lastEnvValue_ + diff * 0.004;
         }
 
         this.lastEnvValue_ = envValue;
