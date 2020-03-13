@@ -240,3 +240,5 @@ function createExperimentSpec(db_collection) {
     }
     return trials;
 }
+
+module.exports = createExperimentSpec;
