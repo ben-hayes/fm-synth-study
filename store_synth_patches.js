@@ -3,7 +3,7 @@ const md5 = require('md5');
 function makeSynthPatchDoc(synth_data) {
     const synth_id =
         md5(Math.random().toString()
-            + reference_sound
+            + synth_data.metadata.reference_synth
             + synth_data.metadata.participant_id);
     const synth_document = {
         participant_id: synth_data.metadata.participant_id,
