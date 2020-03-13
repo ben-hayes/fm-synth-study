@@ -67,7 +67,6 @@ class ADSR {
                         * (1.0 - this.attackAmp_);
                     this.phase_ += 1;
                 } else {
-                    console.log(this.lastEnvValue_);
                     this.state_ = ADSRStates.DECAY;
                     this.phase_ = 0;
                     envValue = 1;
