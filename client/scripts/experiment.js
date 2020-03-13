@@ -95,7 +95,7 @@ async function createMainSequence(
     sequence.on('end', () => {
         data_store.transmit(
                 TRANSMIT_SYNTH_URL,
-                {participant_id, reference_synth})
+                {participant_id, reference_synth, note})
             .then(response => {
                 if(!response.ok) {
                     alert("Unfortunately there was a problem uploading your "

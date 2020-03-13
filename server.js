@@ -3,6 +3,7 @@ const body_parser = require('body-parser');
 const mongodb = require('mongodb');
 
 const makeSynthPatchDoc = require('./store_synth_patches.js');
+const createExperimentSpec = require('./create_experiment_spec.js');
 
 const SYNTH_PATCH_COLLECTION = "fm_study_synth_patches"
 const QUESTIONNAIRE_COLLECTION = "fm_study_questionnaires"
@@ -62,4 +63,12 @@ app.post('/api/save-questionnaire', function(req, res) {
             res.status(201);
           }
     });
+});
+
+app.get('/api/get-experiment-spec', function(req, res) {
+    db.collection(SYNTH_PATCH_COLLECTION)
+        .find().toArray(synth_patches, (err, docs) => {
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify(createExperimentSpec(docs)));;
+        });
 });
