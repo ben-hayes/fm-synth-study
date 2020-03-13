@@ -338,7 +338,10 @@ async function createSynthScreen(
         param_snapshot,
         () => {
             return fm_synth_ui.getAllParams(ui)
-        });
+    });
+    const form_listener = () => {
+        fm_synth.setAllParams(fm_synth_ui.getAllParams(ui));
+    };
 
     synth_screen.on('run', () => {
         ui = fm_synth_ui.startSynthUI(fm_synth.setParam.bind(fm_synth));
@@ -347,14 +350,17 @@ async function createSynthScreen(
 
         document.addEventListener('keydown', keyDownListener);
         document.addEventListener('keyup', keyUpListener);
+        document.getElementById('synth_form')
+            .addEventListener('submit', form_listener);
     });
     synth_screen.on('end', () => {
-        fm_synth.setAllParams(fm_synth_ui.getAllParams(ui));
         Object.assign(param_store, fm_synth.getAllParams());
         fm_synth_ui.cleanupSynthUI(ui);
 
         document.removeEventListener('keydown', keyDownListener);
         document.removeEventListener('keyup', keyUpListener);
+        document.getElementById('synth_form')
+            .removeEventListener('submit', form_listener);
     });
 
 
