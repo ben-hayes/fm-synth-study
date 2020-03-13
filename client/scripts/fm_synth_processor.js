@@ -30,7 +30,6 @@ class ADSR {
     calculateAlpha() {
         this.alpha_decay = Math.exp(-1/this.decay_);
         this.alpha_release =Math.exp(-1/this.release_);
-        console.log(this.alpha_decay);
     }
 
     setParams(attack, decay, sustain, release) {
