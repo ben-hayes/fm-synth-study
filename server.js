@@ -2,6 +2,8 @@ const express = require('express');
 const body_parser = require('body-parser');
 const mongodb = require('mongodb');
 
+const makeSynthPatchDoc = require('./store_synth_patches.js');
+
 const SYNTH_PATCH_COLLECTION = "fm_study_synth_patches"
 const QUESTIONNAIRE_COLLECTION = "fm_study_questionnaires"
 
@@ -33,11 +35,12 @@ function handleError(res, reason, message, code) {
 
 app.post('/api/save-synth-patch', function(req, res) {
     const synth_data = req.body;
+    const synth_doc = makeSynthPatchDoc(synth_data);
 
-    synth_data.creationDate = new Date();
+    synth_doc.creation_date = new Date();
 
     db.collection(SYNTH_PATCH_COLLECTION)
-        .insert(synth_data, (err, doc) => {
+        .insert(synth_doc, (err, doc) => {
           if (err) {
             handleError(res, err.message, "Failed to insert new record");
           } else {

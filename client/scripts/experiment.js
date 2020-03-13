@@ -23,12 +23,14 @@ async function createMainLoop(fm_synth,
     for (let i = 0; i < trials.length; i++) {
         const param_snapshot = trials[i].synth_preset;
         const semantic_prompt = trials[i].semantic_prompt;
+        const reference_synth = trials[i].synth_id;
         const note = trials[i].note_pitch;
         const sequence = await createMainSequence(
                 fm_synth,
                 note,
                 fm_synth_ui,
                 param_snapshot,
+                reference_synth,
                 semantic_prompt,
                 semantic_descriptors,
                 i,
@@ -44,6 +46,7 @@ async function createMainSequence(
     note,
     fm_synth_ui,
     param_snapshot,
+    reference_synth,
     semantic_prompt,
     semantic_descriptors,
     index,
@@ -90,7 +93,9 @@ async function createMainSequence(
         title: `synth_descriptor_sequence_${index}`
     });
     sequence.on('end', () => {
-        data_store.transmit(TRANSMIT_SYNTH_URL, {participant_id})
+        data_store.transmit(
+                TRANSMIT_SYNTH_URL,
+                {participant_id, reference_synth})
             .then(response => {
                 if(!response.ok) {
                     alert("Unfortunately there was a problem uploading your "
@@ -399,7 +404,11 @@ async function createMSIScreen(participant_id) {
     msi_screen.on('prepare', () => {
         msi_screen.options.datastore = data_store;
     });
-    msi_screen.on('end', () => {
+    const msi_sequence = new lab.flow.Sequence({
+        content: [msi_screen]
+    });
+    msi_sequence.on('end', function () {
+        console.log(data_store);
         data_store.transmit(TRANSMIT_MSI_URL, {participant_id})
             .then(response => {
                 if(!response.ok) {
@@ -409,8 +418,9 @@ async function createMSIScreen(participant_id) {
                     data_store.download();
                 }
             });
+        console.log(data_store);
     });
-    return msi_screen;
+    return msi_sequence;
 }
 
 function createExperimentScreens(text_list) {

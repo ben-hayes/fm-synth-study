@@ -110,7 +110,8 @@ function fetchExperimentParams(num_samples) {
             },
             note_pitch: 36,
             synth_preset: {
-            }
+            },
+            synth_id: 'ecsa93u5hq2tnw',
         },
         {
             semantic_prompt: {
@@ -119,7 +120,8 @@ function fetchExperimentParams(num_samples) {
             },
             note_pitch: 36,
             synth_preset: {
-            }
+            },
+            synth_id: 'ecsa93u5hq2tnw',
         },
         {
             semantic_prompt: {
@@ -128,7 +130,8 @@ function fetchExperimentParams(num_samples) {
             },
             note_pitch: 60,
             synth_preset: {
-            }
+            },
+            synth_id: 'ecsa93u5hq2tnw',
         },
         {
             semantic_prompt: {
@@ -137,7 +140,8 @@ function fetchExperimentParams(num_samples) {
             },
             note_pitch: 72,
             synth_preset: {
-            }
+            },
+            synth_id: 'ecsa93u5hq2tnw',
         },
     ]
 
