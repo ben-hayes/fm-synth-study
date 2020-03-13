@@ -175,6 +175,7 @@ define(function() {
 
 async function fetchExperimentParams() {
     const res = await fetch ("https://qm-fm-study.herokuapp.com/api/get-experiment-spec");
+    console.log(res);
     return res;
 }
 
