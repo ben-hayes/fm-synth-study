@@ -101,6 +101,11 @@ class ADSR {
             break;
         }
 
+        const diff = envValue - this.lastEnvValue_;
+        if (diff > 0.008) {
+            envValue = this.lastEnvValue_ + diff * 0.008;
+        }
+
         this.lastEnvValue_ = envValue;
         return envValue;
     }
