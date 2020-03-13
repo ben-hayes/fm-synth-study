@@ -6,20 +6,31 @@ const ADSRStates = {
     SILENT: 'silent',
 }
 
+const THRESH = 0.00001;
+
 class ADSR {
-    constructor (segmentLength) {
+    constructor (segmentLength, sampleRate) {
         this.phase_ = 0;
         this.segmentLength_ = segmentLength;
         this.state_ = ADSRStates.SILENT;
+        this.sample_rate_ = sampleRate;
 
         this.attack_ = 0.1;
         this.decay_ = 0.5;
         this.sustain_ = 0.3;
         this.release_ = 0.4;
 
+        this.calculateAlpha();
+
         this.releaseAmp_ = 0.0;
         this.attackAmp_ = 0.0;
         this.lastEnvValue_ = 0.0;
+    }
+
+    calculateAlpha() {
+        this.alpha_decay = Math.exp(-1/this.decay_);
+        this.alpha_release =Math.exp(-1/this.release_);
+        console.log(this.alpha_decay);
     }
 
     setParams(attack, decay, sustain, release) {
@@ -27,6 +38,7 @@ class ADSR {
         this.decay_ = (decay ** 3.0) * this.segmentLength_;
         this.sustain_ = sustain;
         this.release_ = (release ** 3.0) * this.segmentLength_;
+        this.calculateAlpha();
     }
 
     attack() {
@@ -63,11 +75,9 @@ class ADSR {
             break;
 
             case ADSRStates.DECAY:
-                if (this.phase_ < this.decay_) {
-                    envValue =
-                     (1 - this.phase_ / this.decay_) 
-                     * (1 - this.sustain_) 
-                     + this.sustain_;
+                const diff = this.lastEnvValue_ - this.sustain_;
+                if (diff > THRESH) {
+                    envValue = diff * this.alpha_decay + this.sustain_;
                     this.phase_ += 1;
                 } else {
                     this.state_ = ADSRStates.SUSTAIN;
@@ -81,21 +91,14 @@ class ADSR {
             break;
 
             case ADSRStates.RELEASE:
-                if (this.phase_ < this.release_) {
-                    envValue =
-                        (1 - this.phase_ / this.release_) 
-                        * this.releaseAmp_;
+                if (this.lastEnvValue_ > THRESH) {
+                    envValue = this.lastEnvValue_ * this.alpha_release;
                     this.phase_ += 1;
                 } else {
                     this.state_ = ADSRStates.SILENT;
                     this.phase_ = 0;
                 }
             break;
-        }
-
-        const diff = envValue - this.lastEnvValue_;
-        if (diff > 0.008) {
-            envValue = this.lastEnvValue_ + diff * 0.008;
         }
 
         this.lastEnvValue_ = envValue;
@@ -109,9 +112,9 @@ class FMSynthProcessor extends AudioWorkletProcessor {
 
         this.envStageMaxLength = 2 * sampleRate;
 
-        this.env1 = new ADSR(this.envStageMaxLength);
-        this.env2 = new ADSR(this.envStageMaxLength);
-        this.env3 = new ADSR(this.envStageMaxLength);
+        this.env1 = new ADSR(this.envStageMaxLength, sampleRate);
+        this.env2 = new ADSR(this.envStageMaxLength, sampleRate);
+        this.env3 = new ADSR(this.envStageMaxLength, sampleRate);
 
         this.op1_phase_ = 0.0;
         this.op2_phase_ = 0.0;
