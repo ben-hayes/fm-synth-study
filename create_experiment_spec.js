@@ -219,9 +219,9 @@ function findLeastReferencedSynthPatches(synth_patches) {
     return patches;
 }
 
-function createExperimentSpec(synth_patches) {
+function createExperimentSpec(db_collection) {
     const trials = [];
-    const synth_patches = findLeastReferencedSynthPatches(synth_patches);
+    const synth_patches = findLeastReferencedSynthPatches(db_collection);
 
     for (let descriptor_index of prompts) {
         for (let i = 0; i < pitches.length; i++) {
