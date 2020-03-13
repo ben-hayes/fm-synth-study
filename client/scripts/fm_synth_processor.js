@@ -107,7 +107,7 @@ class FMSynthProcessor extends AudioWorkletProcessor {
     constructor () {
         super();
 
-        this.envStageMaxLength = 2* sampleRate;
+        this.envStageMaxLength = 2 * sampleRate;
 
         this.env1 = new ADSR(this.envStageMaxLength);
         this.env2 = new ADSR(this.envStageMaxLength);

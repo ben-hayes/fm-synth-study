@@ -41,6 +41,8 @@ return class FMSynth {
     setParam(paramName, value, rampTime) {
         if (this.using_true_params)
             this.node_.parameters.get(paramName).value = value;
+        else
+            this.true_params[paramName] = value;
     }
 
     setAllParams(paramStates, is_temp) {
