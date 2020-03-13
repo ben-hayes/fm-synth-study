@@ -81,10 +81,10 @@ return class FMSynth {
     }
 
     startNoteWithTempParams(note, temp_params) {
-        this.setAllParams(temp_params);
         this.using_true_params = false;
         this.change_param_allowed = false;
         this.true_params = this.getAllParams();
+        this.setAllParams(temp_params);
         this.node_.port.postMessage({
             'type': 'note_on',
             'note': note
