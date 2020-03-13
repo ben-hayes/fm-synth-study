@@ -25,14 +25,16 @@ requirejs(
         }
     });
     const synth = new FMSynth(context);
-    const {trials, semantic_descriptors} 
-        = fetchExperimentParams(3);
-    synth.initialize().then(() => {
-        return experiment.createExperiment(
-            synth,
-            fm_synth_ui,
-            trials,
-            semantic_descriptors,
-            pid);
-    }).then(exp => exp.run());
+    synth.initialize()
+        .then(() => {
+            return fetchExperimentParams();
+        })
+        .then(({trials, semantic_descriptors}) => {
+            return experiment.createExperiment(
+                synth,
+                fm_synth_ui,
+                trials,
+                semantic_descriptors,
+                pid);
+        }).then(exp => exp.run());
 });
