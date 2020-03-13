@@ -349,6 +349,7 @@ async function createSynthScreen(
         document.addEventListener('keyup', keyUpListener);
     });
     synth_screen.on('end', () => {
+        fm_synth.setAllParams(fm_synth_ui.getAllParams(ui));
         Object.assign(param_store, fm_synth.getAllParams());
         fm_synth_ui.cleanupSynthUI(ui);
 
