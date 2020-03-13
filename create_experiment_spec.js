@@ -190,11 +190,12 @@ function findLeastReferencedSynthPatches(synth_patches) {
             params: synth_doc.synth_parameters,
             note: synth_doc.note
         };
-
+        synth_counts[id] = 0;
+    }
+    for (const synth_doc of synth_patches) {
         const ref = synth_doc.reference_sound;
 
         if (ref in synth_counts) synth_counts[ref] += 1;
-        else if (ref in synths) synth_counts[ref] = 1;
     }
     const synth_ids = Object.keys(synth_counts);
     synth_ids.sort((a, b) => {
