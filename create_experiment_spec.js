@@ -178,7 +178,7 @@ const default_synth = {
 };
 
 const prompts = [0, 1, 2];
-const pitches = [36, 60, 72];
+const pitches = [40, 57, 74];
 const directions = ['more', 'less'];
 
 function findLeastReferencedSynthPatches(synth_patches) {
