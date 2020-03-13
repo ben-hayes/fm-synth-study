@@ -207,7 +207,10 @@ function findLeastReferencedSynthPatches(synth_patches) {
         for (let i = 0; i < prompts.length; i++) {
             for (const id of synth_ids) {
                 if (synths[id].note === note) {
-                    patches[n].push(synths[id].params);
+                    patches[n].push({
+                        id,
+                        preset: synths[id].params
+                    });
 
                     delete synths[id];
                     synth_ids.splice(synth_ids.indexOf(id), 1);
