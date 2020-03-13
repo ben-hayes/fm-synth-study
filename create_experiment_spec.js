@@ -1,3 +1,5 @@
+const shuffle = require('shuffle-array');
+
 const descriptors = [
     {
         name: 'bright',
@@ -241,6 +243,7 @@ function createExperimentSpec(db_collection) {
             trials.push(trial);
         }
     }
+    shuffle(trials);
     return {semantic_descriptors: descriptors, trials};
 }
 
