@@ -18,6 +18,7 @@ requirejs(
     }
     let pid = getUrlParam('pid', 'undefined');
 
+    window.AudioContext = window.AudioContext || window.webkitAudioContext;
     const context = new AudioContext();
     document.addEventListener('keydown', () => {
         if (context.state !== 'running') {
