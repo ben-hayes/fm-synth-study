@@ -67,8 +67,8 @@ app.post('/api/save-questionnaire', function(req, res) {
 
 app.get('/api/get-experiment-spec', function(req, res) {
     db.collection(SYNTH_PATCH_COLLECTION)
-        .find().toArray(synth_patches, (err, docs) => {
+        .find().toArray((err, docs) => {
             res.setHeader('Content-Type', 'application/json');
             res.end(JSON.stringify(createExperimentSpec(docs)));;
         });
-});
+}):
