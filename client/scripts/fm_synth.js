@@ -19,7 +19,6 @@
 
 define(['./fm_synth_node'], function (FMSynthNode) {
 return class FMSynth {
-    change_param_allowed = true;
     using_true_params = true;
     true_params = {};
 
@@ -40,13 +39,12 @@ return class FMSynth {
     }
 
     setParam(paramName, value, rampTime) {
-        if (this.change_param_allowed)
+        if (this.using_true_params)
             this.node_.parameters.get(paramName).value = value;
     }
 
     setAllParams(paramStates, rampTime) {
         this.using_true_params = true;
-        this.change_param_allowed = true;
         for (let param in paramStates) {
             this.node_.parameters.get(param).value = paramStates[param];
         }
@@ -70,7 +68,6 @@ return class FMSynth {
     startNote(note) {
         if (!this.using_true_params) {
             this.setAllParams(this.true_params);
-            this.change_param_allowed = true;
             this.using_true_params = true;
         }
 
@@ -81,9 +78,9 @@ return class FMSynth {
     }
 
     startNoteWithTempParams(note, temp_params) {
+        if (this.using_true_params) this.true_params = this.getAllParams();
+
         this.using_true_params = false;
-        this.change_param_allowed = false;
-        this.true_params = this.getAllParams();
         this.setAllParams(temp_params);
         this.node_.port.postMessage({
             'type': 'note_on',
