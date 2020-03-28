@@ -29,6 +29,7 @@ requirejs(['./fm_synth'], function(FMSynth) {
                 from: patch.reference_sound,
                 to: patch.synth_id,
                 label: patch.prompt.descriptor,
+                arrows: 'to',
             })
         });
 
@@ -42,7 +43,11 @@ requirejs(['./fm_synth'], function(FMSynth) {
             nodes: nodes_set,
             edges: edges_set
         };
-        var options = {};
+        var options = {
+            layout: {
+                hierarchical: true,
+            }
+        };
 
         // initialize your network!
         var network = new vis.Network(container, data, options);
