@@ -73,3 +73,12 @@ app.get('/api/get-experiment-spec', function(req, res) {
             res.end(JSON.stringify(createExperimentSpec(docs)));;
         });
 });
+
+app.get('/api/get-synth-patches', function(req, res) {
+    db.collection(SYNTH_PATCH_COLLECTION)
+        .find().toArray((err, docs) => {
+            res.setHeader('Content-Type', 'application/json');
+            res.setHeader('Access-Control-Allow-Origin', '*');
+            res.end(JSON.stringify(docs));
+        });
+});
