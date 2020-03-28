@@ -1,7 +1,7 @@
 
 requirejs(['./fm_synth'], function(FMSynth) {
     async function getPatches() {
-        const patches = await fetch('http://qm-fm-study.herokuapp.com/api/get-synth-patches');
+        const patches = await fetch('https://qm-fm-study.herokuapp.com/api/get-synth-patches');
         const text = await patches.text();
         return JSON.parse(text);
     }
