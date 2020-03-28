@@ -140,9 +140,9 @@ class FMSynthProcessor extends AudioWorkletProcessor {
         this.env1.attack();
         this.env2.attack();
         this.env3.attack();
-        //this.op1_phase_ = 0.0;
-        //this.op2_phase_ = 0.0;
-        //this.op3_phase_ = 0.0;
+        this.op1_phase_ = 0.0;
+        this.op2_phase_ = 0.0;
+        this.op3_phase_ = 0.0;
     }
 
     noteOff() {
@@ -216,18 +216,27 @@ class FMSynthProcessor extends AudioWorkletProcessor {
                     this.op1_phase_ +=
                         op1_multiplier * 
                             2.0 * Math.PI * this.note_freq / sampleRate;
+                    while (this.op1_phase_ >= 2.0 * Math.PI) {
+                        this.op1_phase_ -= 2.0 * Math.PI;
+                    }
 
                     const op2_multiplier =
                         params.coarse_2[0] + 0.001 * params.fine_2[0];
                     this.op2_phase_ +=
                         op2_multiplier * 
                             2.0 * Math.PI * this.note_freq / sampleRate;
+                    while (this.op2_phase_ >= 2.0 * Math.PI) {
+                        this.op2_phase_ -= 2.0 * Math.PI;
+                    }
                     
                     const op3_multiplier =
                         params.coarse_3[0] + 0.001 * params.fine_3[0];
                     this.op3_phase_ +=
                         op3_multiplier * 
                             2.0 * Math.PI * this.note_freq / sampleRate;
+                    while (this.op3_phase_ >= 2.0 * Math.PI) {
+                        this.op3_phase_ -= 2.0 * Math.PI;
+                    }
 
                     channel[n] = op1_out;
                 }
