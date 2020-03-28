@@ -204,6 +204,8 @@ function findLeastReferencedSynthPatches(synth_patches) {
         else return Math.random >= 0.5 ? 1 : -1;
     });
 
+    shuffle(synth_ids);
+
     const patches = [];
     for (let n = 0; n < pitches.length; n++) {
         patches.push([]);
