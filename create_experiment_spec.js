@@ -201,7 +201,7 @@ function findLeastReferencedSynthPatches(synth_patches) {
     synth_ids.sort((a, b) => {
         if (synth_counts[a] > synth_counts[b]) return 1;
         else if (synth_counts[a] < synth_counts[b]) return -1;
-        else return 0;
+        else return Math.random >= 0.5 ? 1 : -1;
     });
 
     const patches = [];
