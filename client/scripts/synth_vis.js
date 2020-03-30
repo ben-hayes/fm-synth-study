@@ -18,19 +18,38 @@ requirejs(['./fm_synth'], function(FMSynth) {
     synth.initialize().then(() => getPatches()).then(patches => {
         const nodes = [];
         const edges = [];
-        console.log(patches);
+        const participants = [];
         patches.forEach(patch => {
+            let participant_index = participants.indexOf(patch.participant_id);
+            if (participant_index === -1) {
+                participants.push(patch.participant_id);
+                participant_index = participants.length - 1;
+            }
+
             nodes.push({
                 id: patch.synth_id,
-                label: patch.note.toString(),
-                color: patch.reference_sound === 'default' ? 'blue' : 'green',
+                label: participant_index.toString(),
+                title: patch.synth_id,
+                color: {
+                    background: patch.reference_sound === 'default' ? 'blue' : 'green',
+                    highlight: patch.reference_sound === 'default' ? '#5555ff' : '#55ff55',
+
+                },
+                borderWidthSelected: 5,
+                widthConstraint: {
+                    minimum: 100,
+                    maximum: 100,
+                }
             });
             edges.push({
                 from: patch.reference_sound,
                 to: patch.synth_id,
                 label: patch.prompt.descriptor,
                 arrows: 'to',
-            })
+                color: 'black',
+                labelHighlightBold: false,
+                chosen: false,
+            });
         });
 
         const nodes_set = new vis.DataSet(nodes);
@@ -45,7 +64,13 @@ requirejs(['./fm_synth'], function(FMSynth) {
         };
         var options = {
             layout: {
-                hierarchical: true,
+                hierarchical: {
+                    enabled: true,
+                    //sortMethod: 'directed',
+                },
+            },
+            interaction: {
+                hover: true,
             }
         };
 
@@ -66,6 +91,20 @@ requirejs(['./fm_synth'], function(FMSynth) {
                     playing = false;
                 }
             }
+        });
+
+        network.on('hoverNode', e => {
+            const node_id = e.node;
+            const patch = patches.find(patch => patch.synth_id === node_id);
+            const participant_id = patch.participant_id;
+            const select_nodes = [];
+            patches.forEach(patch => {
+                if (patch.participant_id === participant_id) {
+                    select_nodes.push(patch.synth_id);
+                }
+            });
+            network.unselectAll();
+            network.selectNodes(select_nodes, false);
         });
     });
 });
