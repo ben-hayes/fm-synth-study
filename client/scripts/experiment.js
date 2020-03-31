@@ -404,7 +404,6 @@ async function createMSIScreen(participant_id) {
         content: [msi_screen]
     });
     msi_sequence.on('end', function () {
-        console.log(data_store);
         data_store.transmit(TRANSMIT_MSI_URL, {participant_id})
             .then(response => {
                 if(!response.ok) {
@@ -414,7 +413,6 @@ async function createMSIScreen(participant_id) {
                     data_store.download();
                 }
             });
-        console.log(data_store);
     });
     return msi_sequence;
 }
@@ -424,7 +422,7 @@ function createExperimentScreens(text_list) {
     for (let screen of text_list) {
         screens.push(new lab.html.Screen({
             content: screen.join(''),
-            responses:{ keypress: 'confirm' }
+            responses:{ keypress: 'confirm' },
         }));
     }
     return screens;
@@ -475,7 +473,19 @@ async function createExperiment(
     return experiment;
 }
 
+async function createQuestionnaire(participant_id) {
+    const experiment_text = await getExperimentText();
+    const msi_screen = await createMSIScreen(participant_id);
+    const post_questionnaire =
+        createExperimentScreens(experiment_text.post_questionnaire_screens);
+    const questionnaire = new lab.flow.Sequence({
+        content: [].concat(msi_screen).concat(post_questionnaire),
+    });
+    return questionnaire;
+}
+
 return {
-    createExperiment
+    createExperiment,
+    createQuestionnaire,
 };
 });
