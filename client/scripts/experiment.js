@@ -10,8 +10,7 @@ requirejs.config({
 });
 
 define(['lab'], function(lab) {
-const TRANSMIT_SYNTH_URL = 'https://qm-fm-study.herokuapp.com/api/save-synth-patch';
-const TRANSMIT_MSI_URL = 'https://qm-fm-study.herokuapp.com/api/save-questionnaire';
+const TRANSMIT_URL = '/api/store-experiment-data';
 
 async function createMainLoop(fm_synth,
     fm_synth_ui,
@@ -52,7 +51,6 @@ async function createMainSequence(
     index,
     participant_id)
 {
-    const data_store = new lab.data.Store()
     const param_store = {};
     const prompt_text = semantic_descriptors
                             [semantic_prompt.descriptor_index]
@@ -67,8 +65,7 @@ async function createMainSequence(
                 param_store,
                 prompt_text,
                 index,
-                participant_id,
-                data_store),
+                participant_id),
             await createPromptRatingScreen(
                 fm_synth,
                 note,
@@ -76,8 +73,7 @@ async function createMainSequence(
                 param_store,
                 prompt_text,
                 index,
-                participant_id,
-                data_store),
+                participant_id),
             await createDescriptorRatingScreen(
                 fm_synth,
                 note,
@@ -87,23 +83,10 @@ async function createMainSequence(
                 semantic_descriptors,
                 9,
                 index,
-                participant_id,
-                data_store),
+                participant_id),
         ],
-        title: `synth_descriptor_sequence_${index}`
-    });
-    sequence.on('end', () => {
-        data_store.transmit(
-                TRANSMIT_SYNTH_URL,
-                {participant_id, reference_synth, note})
-            .then(response => {
-                if(!response.ok) {
-                    alert("Unfortunately there was a problem uploading your "
-                        + "response. Please save the data file and send this to"
-                        + " b.j.hayes@se19.qmul.ac.uk.");
-                    data_store.download();
-                }
-            });
+        data: {participant_id, reference_synth, note},
+        title: 'synth_sequence'
     });
     return sequence;
 }
@@ -115,8 +98,7 @@ async function createPromptRatingScreen(
     param_store,
     semantic_prompt,
     index,
-    participant_id,
-    data_store)
+    participant_id)
 {
     const rating_screen_data = await fetch('rating_interface.html');
     const rating_screen_html = await rating_screen_data.text();
@@ -124,7 +106,7 @@ async function createPromptRatingScreen(
     const row = createPromptRow(semantic_prompt);
     const rating_screen = new lab.html.Form({
         id: `prompt_${index}`,
-        title: `prompt`,
+        title: 'prompt',
         content: rating_screen_html
                     .replace('<%ROWS%>', row)
                     .replace('<%TEXT%>', text)
@@ -132,9 +114,6 @@ async function createPromptRatingScreen(
         parameters: {
             participant_id
         },
-    });
-    rating_screen.on('prepare', () => {
-        rating_screen.options.datastore = data_store;
     });
 
     activateRatingScreenSynth(
@@ -174,8 +153,7 @@ async function createDescriptorRatingScreen(
     semantic_descriptors,
     batch_size,
     index,
-    participant_id,
-    data_store) 
+    participant_id) 
 {
     const batch = batch_size || 10;
     const rating_screen_data = await fetch('rating_interface.html');
@@ -189,7 +167,7 @@ async function createDescriptorRatingScreen(
         const rows = createDescriptorRows(descriptor_batch, semantic_prompt);
         const rating_screen = new lab.html.Form({
             id: `descriptor_${index}`,
-            title: `descriptor`,
+            title: 'descriptor',
             content: rating_screen_html
                         .replace('<%ROWS%>', rows)
                         .replace('<%TEXT%>', text)
@@ -197,9 +175,6 @@ async function createDescriptorRatingScreen(
             parameters: {
                 participant_id
             },
-        });
-        rating_screen.on('prepare', () => {
-            rating_screen.options.datastore = data_store;
         });
 
         activateRatingScreenSynth(
@@ -309,20 +284,16 @@ async function createSynthScreen(
     param_store,
     semantic_prompt,
     index,
-    participant_id,
-    data_store) 
+    participant_id) 
 {
     const synth_html = await fm_synth_ui.getSynthHTML();
     const synth_screen = new lab.html.Form({
         content: synth_html.replace('<%PROMPT%>', `Please edit the synth parameters to make this sound <em>${semantic_prompt}</em>`),
         id: `synth_${index}`,
-        title: `synth`,
+        title: 'synth',
         parameters: {
             participant_id
         },
-    });
-    synth_screen.on('prepare', () => {
-        synth_screen.options.datastore = data_store;
     });
 
     let ui;
@@ -391,28 +362,14 @@ async function createSynthDemo(fm_synth, fm_synth_ui) {
 async function createMSIScreen(participant_id) {
     const msi_data = await fetch('questionnaire_interface.html');
     const msi_html = await msi_data.text();
-    const data_store = new lab.data.Store();
     const msi_screen = new lab.html.Form({
         content: msi_html,
         id: 'questionnaire',
-        title: 'questionnaire'
-    });
-    msi_screen.on('prepare', () => {
-        msi_screen.options.datastore = data_store;
+        title: 'questionnaire',
+        data: {participant_id}
     });
     const msi_sequence = new lab.flow.Sequence({
         content: [msi_screen]
-    });
-    msi_sequence.on('end', function () {
-        data_store.transmit(TRANSMIT_MSI_URL, {participant_id})
-            .then(response => {
-                if(!response.ok) {
-                    alert("Unfortunately there was a problem uploading your "
-                        + "response. Please save the data file and send this to"
-                        + " b.j.hayes@se19.qmul.ac.uk.");
-                    data_store.download();
-                }
-            });
     });
     return msi_sequence;
 }
@@ -441,7 +398,6 @@ async function createExperiment(
     semantic_descriptors,
     participant_id) 
 {
-    //const datastore = new lab.data.Store();
     const experiment_text = await getExperimentText();
     const introduction =
         createExperimentScreens(experiment_text.pre_demo_screens);
@@ -470,22 +426,27 @@ async function createExperiment(
                    .concat(msi_screen)
                    .concat(post_questionnaire),
     });
-    return experiment;
-}
-
-async function createQuestionnaire(participant_id) {
-    const experiment_text = await getExperimentText();
-    const msi_screen = await createMSIScreen(participant_id);
-    const post_questionnaire =
-        createExperimentScreens(experiment_text.post_questionnaire_screens);
-    const questionnaire = new lab.flow.Sequence({
-        content: [].concat(msi_screen).concat(post_questionnaire),
+    msi_screen.on('end', () => {
+        console.log(experiment.options.datastore);
+        experiment.options.datastore.transmit(
+            TRANSMIT_URL,
+            {
+                pid: participant_id
+            }
+        ).then((res) => {
+            console.log(res);
+            if(!res.ok) {
+                alert("Unfortunately there was a problem uploading your "
+                    + "response. Please save the data file and send this to"
+                    + " b.j.hayes@se19.qmul.ac.uk.");
+                experiment.options.datastore.download();
+            }
+        });
     });
-    return questionnaire;
+    return experiment;
 }
 
 return {
     createExperiment,
-    createQuestionnaire,
 };
 });
