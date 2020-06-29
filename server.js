@@ -9,7 +9,9 @@ const SYNTH_PATCH_COLLECTION = "fm_study_synth_patches"
 const QUESTIONNAIRE_COLLECTION = "fm_study_questionnaires"
 
 const app = express();
-app.use(body_parser.json());
+app.use(bodyParser.json({
+  limit: '50mb',
+}));
 app.use(express.static('client'));
 
 let db;
