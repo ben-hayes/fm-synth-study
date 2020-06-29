@@ -9,15 +9,6 @@ requirejs(
         });
         return vars;
     }
-    function getUrlParam(parameter, defaultvalue){
-        let urlparameter = defaultvalue;
-        if(window.location.href.indexOf(parameter) > -1){
-            urlparameter = getUrlVars()[parameter];
-        }
-        return urlparameter;
-    }
-    let pid = getUrlParam('pid', 'undefined');
-
     window.AudioContext = window.AudioContext || window.webkitAudioContext;
     const context = new AudioContext();
     document.addEventListener('keydown', () => {
@@ -30,12 +21,12 @@ requirejs(
         .then(() => {
             return fetchExperimentParams();
         })
-        .then(({trials, semantic_descriptors}) => {
+        .then(({trials, semantic_descriptors, participant_id}) => {
             return experiment.createExperiment(
                 synth,
                 fm_synth_ui,
                 trials,
                 semantic_descriptors,
-                pid);
+                participant_id);
         }).then(exp => exp.run());
 });

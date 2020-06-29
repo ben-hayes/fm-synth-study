@@ -10,8 +10,7 @@ requirejs.config({
 });
 
 define(['lab'], function(lab) {
-const TRANSMIT_SYNTH_URL = 'https://qm-fm-study.herokuapp.com/api/save-synth-patch';
-const TRANSMIT_MSI_URL = 'https://qm-fm-study.herokuapp.com/api/save-questionnaire';
+const TRANSMIT_URL = '/api/store-experiment-data';
 
 async function createMainLoop(fm_synth,
     fm_synth_ui,
@@ -52,7 +51,6 @@ async function createMainSequence(
     index,
     participant_id)
 {
-    const data_store = new lab.data.Store()
     const param_store = {};
     const prompt_text = semantic_descriptors
                             [semantic_prompt.descriptor_index]
@@ -67,8 +65,7 @@ async function createMainSequence(
                 param_store,
                 prompt_text,
                 index,
-                participant_id,
-                data_store),
+                participant_id),
             await createPromptRatingScreen(
                 fm_synth,
                 note,
@@ -76,8 +73,7 @@ async function createMainSequence(
                 param_store,
                 prompt_text,
                 index,
-                participant_id,
-                data_store),
+                participant_id),
             await createDescriptorRatingScreen(
                 fm_synth,
                 note,
@@ -87,23 +83,10 @@ async function createMainSequence(
                 semantic_descriptors,
                 9,
                 index,
-                participant_id,
-                data_store),
+                participant_id),
         ],
-        title: `synth_descriptor_sequence_${index}`
-    });
-    sequence.on('end', () => {
-        data_store.transmit(
-                TRANSMIT_SYNTH_URL,
-                {participant_id, reference_synth, note})
-            .then(response => {
-                if(!response.ok) {
-                    alert("Unfortunately there was a problem uploading your "
-                        + "response. Please save the data file and send this to"
-                        + " b.j.hayes@se19.qmul.ac.uk.");
-                    data_store.download();
-                }
-            });
+        data: {participant_id, reference_synth, note},
+        title: 'synth_sequence'
     });
     return sequence;
 }
@@ -115,8 +98,7 @@ async function createPromptRatingScreen(
     param_store,
     semantic_prompt,
     index,
-    participant_id,
-    data_store)
+    participant_id)
 {
     const rating_screen_data = await fetch('rating_interface.html');
     const rating_screen_html = await rating_screen_data.text();
@@ -124,7 +106,7 @@ async function createPromptRatingScreen(
     const row = createPromptRow(semantic_prompt);
     const rating_screen = new lab.html.Form({
         id: `prompt_${index}`,
-        title: `prompt`,
+        title: 'prompt',
         content: rating_screen_html
                     .replace('<%ROWS%>', row)
                     .replace('<%TEXT%>', text)
@@ -132,9 +114,6 @@ async function createPromptRatingScreen(
         parameters: {
             participant_id
         },
-    });
-    rating_screen.on('prepare', () => {
-        rating_screen.options.datastore = data_store;
     });
 
     activateRatingScreenSynth(
@@ -174,8 +153,7 @@ async function createDescriptorRatingScreen(
     semantic_descriptors,
     batch_size,
     index,
-    participant_id,
-    data_store) 
+    participant_id) 
 {
     const batch = batch_size || 10;
     const rating_screen_data = await fetch('rating_interface.html');
@@ -189,7 +167,7 @@ async function createDescriptorRatingScreen(
         const rows = createDescriptorRows(descriptor_batch, semantic_prompt);
         const rating_screen = new lab.html.Form({
             id: `descriptor_${index}`,
-            title: `descriptor`,
+            title: 'descriptor',
             content: rating_screen_html
                         .replace('<%ROWS%>', rows)
                         .replace('<%TEXT%>', text)
@@ -197,9 +175,6 @@ async function createDescriptorRatingScreen(
             parameters: {
                 participant_id
             },
-        });
-        rating_screen.on('prepare', () => {
-            rating_screen.options.datastore = data_store;
         });
 
         activateRatingScreenSynth(
@@ -309,20 +284,16 @@ async function createSynthScreen(
     param_store,
     semantic_prompt,
     index,
-    participant_id,
-    data_store) 
+    participant_id) 
 {
     const synth_html = await fm_synth_ui.getSynthHTML();
     const synth_screen = new lab.html.Form({
         content: synth_html.replace('<%PROMPT%>', `Please edit the synth parameters to make this sound <em>${semantic_prompt}</em>`),
         id: `synth_${index}`,
-        title: `synth`,
+        title: 'synth',
         parameters: {
             participant_id
         },
-    });
-    synth_screen.on('prepare', () => {
-        synth_screen.options.datastore = data_store;
     });
 
     let ui;
@@ -388,33 +359,57 @@ async function createSynthDemo(fm_synth, fm_synth_ui) {
     return synth_screen;
 }
 
+async function createConsentScreen() {
+    const consent_data = await fetch('consent_form.html');
+    const consent_html = await consent_data.text();
+    const consent_screen = new lab.html.Form({
+        content: consent_html,
+        title: 'consent_form',
+    });
+    const confirm_screen = new lab.html.Screen({
+        content: [
+            "<div><p>Thank you for your time thus far. Unfortunately, without ",
+            "your consent we are unable to proceed with the study.</p>",
+            "<p>The experiment will now terminate. It is now safe to close your ",
+            "browser window.</p></div>"
+        ].join(''),
+    });
+    const sequence = new lab.flow.Sequence({
+        content: [consent_screen, confirm_screen],
+    });
+    let consent = false;
+    let agree_listener;
+    consent_screen.on('run', () => {
+        const submit_button = document.getElementById('agree');
+        agree_listener = submit_button.addEventListener('click', (e) => {
+            consent = true;
+        });
+      });
+    consent_screen.on('end', () => {
+        const submit_button = document.getElementById('agree');
+        submit_button.removeEventListener('click', agree_listener);
+    });
+    confirm_screen.on('run', () => {
+        if (consent) {
+            confirm_screen.end();
+        }
+    });
+
+    return sequence;
+    // TODO: Finish implementing consent form!
+}
+
 async function createMSIScreen(participant_id) {
     const msi_data = await fetch('questionnaire_interface.html');
     const msi_html = await msi_data.text();
-    const data_store = new lab.data.Store();
     const msi_screen = new lab.html.Form({
         content: msi_html,
         id: 'questionnaire',
-        title: 'questionnaire'
-    });
-    msi_screen.on('prepare', () => {
-        msi_screen.options.datastore = data_store;
+        title: 'questionnaire',
+        data: {participant_id}
     });
     const msi_sequence = new lab.flow.Sequence({
         content: [msi_screen]
-    });
-    msi_sequence.on('end', function () {
-        console.log(data_store);
-        data_store.transmit(TRANSMIT_MSI_URL, {participant_id})
-            .then(response => {
-                if(!response.ok) {
-                    alert("Unfortunately there was a problem uploading your "
-                        + "response. Please save the data file and send this to"
-                        + " b.j.hayes@se19.qmul.ac.uk.");
-                    data_store.download();
-                }
-            });
-        console.log(data_store);
     });
     return msi_sequence;
 }
@@ -424,7 +419,7 @@ function createExperimentScreens(text_list) {
     for (let screen of text_list) {
         screens.push(new lab.html.Screen({
             content: screen.join(''),
-            responses:{ keypress: 'confirm' }
+            responses:{ keypress: 'confirm' },
         }));
     }
     return screens;
@@ -443,8 +438,10 @@ async function createExperiment(
     semantic_descriptors,
     participant_id) 
 {
-    //const datastore = new lab.data.Store();
     const experiment_text = await getExperimentText();
+    const welcome = createExperimentScreens(
+        experiment_text.pre_consent_screens);
+    const consent = await createConsentScreen();
     const introduction =
         createExperimentScreens(experiment_text.pre_demo_screens);
     const demo = await createSynthDemo(fm_synth, fm_synth_ui);
@@ -464,7 +461,9 @@ async function createExperiment(
         participant_id);
 
     const experiment = new lab.flow.Sequence({
-        content: [].concat(introduction)
+        content: [].concat(welcome)
+                   .concat(consent)
+                   .concat(introduction)
                    .concat(demo)
                    .concat(post_demo)
                    .concat(main_loop)
@@ -472,10 +471,27 @@ async function createExperiment(
                    .concat(msi_screen)
                    .concat(post_questionnaire),
     });
+    msi_screen.on('end', () => {
+        console.log(experiment.options.datastore);
+        experiment.options.datastore.transmit(
+            TRANSMIT_URL,
+            {
+                pid: participant_id
+            }
+        ).then((res) => {
+            console.log(res);
+            if(!res.ok) {
+                alert("Unfortunately there was a problem uploading your "
+                    + "response. Please save the data file and send this to"
+                    + " b.j.hayes@se19.qmul.ac.uk.");
+                experiment.options.datastore.download();
+            }
+        });
+    });
     return experiment;
 }
 
 return {
-    createExperiment
+    createExperiment,
 };
 });

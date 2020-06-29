@@ -1,6 +1,7 @@
+const md5 = require('md5');
 const shuffle = require('shuffle-array');
 
-const descriptors = [
+const semantic_descriptors = [
     {
         name: 'bright',
         more: 'brighter',
@@ -201,8 +202,10 @@ function findLeastReferencedSynthPatches(synth_patches) {
     synth_ids.sort((a, b) => {
         if (synth_counts[a] > synth_counts[b]) return 1;
         else if (synth_counts[a] < synth_counts[b]) return -1;
-        else return 0;
+        else return Math.random >= 0.5 ? 1 : -1;
     });
+
+    shuffle(synth_ids);
 
     const patches = [];
     for (let n = 0; n < pitches.length; n++) {
@@ -231,6 +234,9 @@ function createExperimentSpec(db_collection) {
     const trials = [];
     const synth_patches = findLeastReferencedSynthPatches(db_collection);
 
+    const date = new Date();
+    const participant_id = md5(date.toString() + Math.random().toString);
+
     for (let descriptor_index of prompts) {
         for (let i = 0; i < pitches.length; i++) {
             const pitch = pitches[i];
@@ -247,7 +253,7 @@ function createExperimentSpec(db_collection) {
         }
     }
     shuffle(trials);
-    return {semantic_descriptors: descriptors, trials};
+    return {semantic_descriptors, trials, participant_id};
 }
 
 module.exports = createExperimentSpec;
