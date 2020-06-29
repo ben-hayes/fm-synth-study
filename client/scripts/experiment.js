@@ -359,6 +359,46 @@ async function createSynthDemo(fm_synth, fm_synth_ui) {
     return synth_screen;
 }
 
+async function createConsentScreen() {
+    const consent_data = await fetch('consent_form.html');
+    const consent_html = await consent_data.text();
+    const consent_screen = new lab.html.Form({
+        content: consent_html,
+        title: 'consent_form',
+    });
+    const confirm_screen = new lab.html.Screen({
+        content: [
+            "<div><p>Thank you for your time thus far. Unfortunately, without ",
+            "your consent we are unable to proceed with the study.</p>",
+            "<p>The experiment will now terminate. It is now safe to close your ",
+            "browser window.</p></div>"
+        ].join(''),
+    });
+    const sequence = new lab.flow.Sequence({
+        content: [consent_screen, confirm_screen],
+    });
+    let consent = false;
+    let agree_listener;
+    consent_screen.on('run', () => {
+        const submit_button = document.getElementById('agree');
+        agree_listener = submit_button.addEventListener('click', (e) => {
+            consent = true;
+        });
+      });
+    consent_screen.on('end', () => {
+        const submit_button = document.getElementById('agree');
+        submit_button.removeEventListener('click', agree_listener);
+    });
+    confirm_screen.on('run', () => {
+        if (consent) {
+            confirm_screen.end();
+        }
+    });
+
+    return sequence;
+    // TODO: Finish implementing consent form!
+}
+
 async function createMSIScreen(participant_id) {
     const msi_data = await fetch('questionnaire_interface.html');
     const msi_html = await msi_data.text();
@@ -399,6 +439,9 @@ async function createExperiment(
     participant_id) 
 {
     const experiment_text = await getExperimentText();
+    const welcome = createExperimentScreens(
+        experiment_text.pre_consent_screens);
+    const consent = await createConsentScreen();
     const introduction =
         createExperimentScreens(experiment_text.pre_demo_screens);
     const demo = await createSynthDemo(fm_synth, fm_synth_ui);
@@ -418,7 +461,9 @@ async function createExperiment(
         participant_id);
 
     const experiment = new lab.flow.Sequence({
-        content: [].concat(introduction)
+        content: [].concat(welcome)
+                   .concat(consent)
+                   .concat(introduction)
                    .concat(demo)
                    .concat(post_demo)
                    .concat(main_loop)

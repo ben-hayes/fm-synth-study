@@ -9,7 +9,7 @@ const SYNTH_PATCH_COLLECTION = "fm_study_synth_patches"
 const QUESTIONNAIRE_COLLECTION = "fm_study_questionnaires"
 
 const app = express();
-app.use(bodyParser.json({
+app.use(body_parser.json({
   limit: '50mb',
 }));
 app.use(express.static('client'));
@@ -63,23 +63,21 @@ app.post('/api/store-experiment-data', function(req, res) {
         }
     }
 
-    for (const synth_doc of synth_patches) {
-        db.collection(SYNTH_PATCH_COLLECTION)
-            .insert(synth_doc, (err, doc) => {
-            if (err) {
-                handleError(res, err.message, "Failed to insert new record");
-            } else {
-                db.collection(QUESTIONNAIRE_COLLECTION)
-                    .insert(questionnaire_responses[0], (err, doc) => {
-                    if (err) {
-                        handleError(res, err.message, "Failed to insert new record");
-                    } else {
-                        res.sendStatus(201);
-                    }
-                });
-            }
-        });
-    }
+    db.collection(QUESTIONNAIRE_COLLECTION)
+        .insert(questionnaire_responses[0], (err, doc) => {
+        if (err) {
+            handleError(res, err.message, "Failed to insert new record");
+        } else {
+            db.collection(SYNTH_PATCH_COLLECTION)
+                .insertMany(synth_patches, (err, doc) => {
+                if (err) {
+                    handleError(res, err.message, "Failed to insert new record");
+                } else {
+                    res.sendStatus(201);
+                }
+            });
+        }
+    });
 });
 
 app.get('/api/get-experiment-spec', function(req, res) {
