@@ -1,6 +1,8 @@
 # FM Synthesis Study
 
-A web-app for conducting an online FM synthesis semantic study, following the procedure set out in [1]. Built around [lab.js](https://lab.js.org/) and [Express](https://expressjs.com/)
+A web-app for conducting an online FM synthesis semantic study, following the procedure set out in [1]. Built around [lab.js](https://lab.js.org/) and [Express](https://expressjs.com/).
+
+AudioWorklet DSP code can be found [in this file.](https://github.com/ben-hayes/fm-synth-study/blob/master/client/scripts/fm_synth_processor.js)
 
 ## Installation
 
