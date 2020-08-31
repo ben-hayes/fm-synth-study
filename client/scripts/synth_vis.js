@@ -1,4 +1,6 @@
-
+/**
+ * @author Ben Hayes <b.j.hayes@se19.qmul.ac.uk>
+ */
 requirejs(['./fm_synth'], function(FMSynth) {
     async function getPatches() {
         const patches = await fetch('https://qm-fm-study.herokuapp.com/api/get-synth-patches');

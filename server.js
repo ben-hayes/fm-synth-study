@@ -1,21 +1,41 @@
+/**
+ * @author Ben Hayes <b.j.hayes@se19.qmul.ac.uk>
+ */
+
+
+/**
+ * Include npm packages
+ */
 const express = require('express');
 const body_parser = require('body-parser');
 const mongodb = require('mongodb');
 
+/**
+ * Include local functions
+ */
 const makeSynthPatchDoc = require('./store_synth_patches.js');
 const createExperimentSpec = require('./create_experiment_spec.js');
 
+/**
+ * Define DB collection globals
+ */
 const SYNTH_PATCH_COLLECTION = "fm_study_synth_patches"
 const QUESTIONNAIRE_COLLECTION = "fm_study_questionnaires"
 
+/**
+ * Initialise Express
+ */
 const app = express();
 app.use(body_parser.json({
-  limit: '50mb',
+  limit: '50mb', // This is necessary to prevent large responses being rejected
+                 // by the server
 }));
 app.use(express.static('client'));
 
+/**
+ * Start MongoDB client, and once ready start Express server
+ */
 let db;
-
 mongodb.MongoClient.connect(process.env.MONGODB_URI || "mongodb://localhost:27017/test", function (err, client) {
   if (err) {
     console.log(err);
@@ -31,11 +51,21 @@ mongodb.MongoClient.connect(process.env.MONGODB_URI || "mongodb://localhost:2701
   });
 });
 
+/**
+ * Handles MongoDB errors
+ * @param {*} res 
+ * @param {*} reason 
+ * @param {*} message 
+ * @param {*} code 
+ */
 function handleError(res, reason, message, code) {
     console.log("ERROR: " + reason);
     res.status(code || 500).json({"error": message});
 }
 
+/**
+ * API endpoint for storing experiment responses
+ */
 app.post('/api/store-experiment-data', function(req, res) {
     const participant_id = req.body.metadata.pid;
     const questionnaire_responses = [];
@@ -80,6 +110,9 @@ app.post('/api/store-experiment-data', function(req, res) {
     });
 });
 
+/**
+ * API endpoint for fetching experiment spec (to enable participation)
+ */
 app.get('/api/get-experiment-spec', function(req, res) {
     db.collection(SYNTH_PATCH_COLLECTION)
         .find().toArray((err, docs) => {
@@ -89,6 +122,9 @@ app.get('/api/get-experiment-spec', function(req, res) {
         });
 });
 
+/**
+ * API endpoint for fetching experiment responses
+ */
 app.get('/api/get-synth-patches', function(req, res) {
     db.collection(SYNTH_PATCH_COLLECTION)
         .find().toArray((err, docs) => {
@@ -98,6 +134,9 @@ app.get('/api/get-synth-patches', function(req, res) {
         });
 });
 
+/**
+ * API endpoint for fetching questionnaire responses
+ */
 app.get('/api/get-questionnaires', function(req, res) {
     db.collection(QUESTIONNAIRE_COLLECTION)
         .find().toArray((err, docs) => {

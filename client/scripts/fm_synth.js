@@ -1,22 +1,8 @@
-// FM Synth
-
-// constructor (audioContext, initialParams?)
-//  - initiates audio worklet node and processor
-
-// set parameter (param, value, rampTime?)
-//  - sets a given parameter to a particular value
-//  - can ramp its value over time
-
-// set all parameters (obj of param states, rampTime?)
-//  - sets all parameters to a given state snapshot
-//  - can ramp all values over time
-
-// play note (note number)
-//  - starts synth sounding (attack portion)
-
-// end note ()
-//  - end any sounding note
-
+/**
+ * Abstracts the AudioWorklet code to provide a straightforward interface to the
+ * FM synth
+ * @author Ben Hayes <b.j.hayes@se19.qmul.ac.uk>
+ */
 define(['./fm_synth_node'], function (FMSynthNode) {
 return class FMSynth {
     using_true_params = true;

@@ -1,6 +1,12 @@
+/**
+ * @author Ben Hayes <b.j.hayes@se19.qmul.ac.uk>
+ */
 const md5 = require('md5');
 const shuffle = require('shuffle-array');
 
+/**
+ * The full dictionary of semantic descriptors to be used in the experiment
+ */
 const semantic_descriptors = [
     {
         name: 'bright',
@@ -154,6 +160,10 @@ const semantic_descriptors = [
     },
 ];
 
+/**
+ * The default parameter settings to be used in the absence of a starting synth
+ * patch
+ */
 const default_synth = {
     id: 'default',
     preset: {
@@ -178,10 +188,18 @@ const default_synth = {
     }
 };
 
-const prompts = [0, 1, 2];
-const pitches = [40, 57, 74];
-const directions = ['more', 'less'];
+const prompts = [0, 1, 2]; // Indices of prompt descriptors
+const pitches = [40, 57, 74]; // MIDI note numbers of patch pitches
+const directions = ['more', 'less']; // Comparative prompt directions
 
+/**
+ * Finds the N least referenced synth patches (where N is given by the number
+ * of prompts by the number of pitches). This allows the reference tree to
+ * grow evenly, rather than particular branches becoming dominant.
+ *
+ * @param {*} synth_patches
+ * @returns A list of N synth patches
+ */
 function findLeastReferencedSynthPatches(synth_patches) {
     const synth_counts = {};
     const synths = {};
@@ -230,6 +248,12 @@ function findLeastReferencedSynthPatches(synth_patches) {
     return patches;
 }
 
+/**
+ * Returns a complete experiment spec given the current contents of the DB
+ *
+ * @param {*} db_collection
+ * @returns An experiment spec
+ */
 function createExperimentSpec(db_collection) {
     const trials = [];
     const synth_patches = findLeastReferencedSynthPatches(db_collection);

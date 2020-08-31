@@ -1,3 +1,12 @@
+/**
+ * Implements the FM synthesiser as an AudioWorkletProcessor -- runs on a
+ * separate audio thread
+ * @author Ben Hayes <b.j.hayes@se19.qmul.ac.uk>
+ */
+
+/**
+ * Enumeration of ADSR envelope states
+ */
 const ADSRStates = {
     ATTACK: 'attack',
     DECAY: 'decay',
@@ -8,7 +17,18 @@ const ADSRStates = {
 
 const THRESH = 0.00001;
 
+/**
+ * Represents an ADSR envelope
+ *
+ * @class ADSR
+ */
 class ADSR {
+    /**
+     * Creates an instance of ADSR.
+     * @param {*} segmentLength Length of envelope segments
+     * @param {*} sampleRate Sample rate in Hz
+     * @memberof ADSR
+     */
     constructor (segmentLength, sampleRate) {
         this.phase_ = 0;
         this.segmentLength_ = segmentLength;
@@ -27,11 +47,31 @@ class ADSR {
         this.lastEnvValue_ = 0.0;
     }
 
+    /**
+     * Sets the envelope's alpha time constants based on the attack and decay
+     * params
+     *
+     * @memberof ADSR
+     */
     calculateAlpha() {
         this.alpha_decay = Math.exp(-1/this.decay_);
         this.alpha_release =Math.exp(-1/this.release_);
     }
 
+    /**
+     * Sets the envelope's internal parameters so that the next computed frame
+     * uses them.
+     *
+     * @param {*} attack Attack segment. Expects range [0.0, 1.0]. Exponentiates
+     *  given value internally.
+     * @param {*} decay Decay segment. Expects range [0.0, 1.0]. Exponentiates
+     *  given value internally.
+     * @param {*} sustain Sustain level. Expects range [0.0, 1.0].
+     * @param {*} release Release segment. Expects range [0.0, 1.0]. 
+     *  Exponentiates given value internally.
+
+     * @memberof ADSR
+     */
     setParams(attack, decay, sustain, release) {
         this.attack_ = (attack ** 3.0) * this.segmentLength_;
         this.decay_ = (decay ** 3.0) * this.segmentLength_;
@@ -40,12 +80,22 @@ class ADSR {
         this.calculateAlpha();
     }
 
+    /**
+     * Start attack segment of sound (i.e. trigger note-on)
+     *
+     * @memberof ADSR
+     */
     attack() {
         this.phase_ = 0;
         this.state_ = ADSRStates.ATTACK;
         this.attackAmp_ = this.lastEnvValue_;
     }
 
+    /**
+     * Start release segment of sound (i.e. trigger note-off)
+     *
+     * @memberof ADSR
+     */
     release() {
         if (this.state_ === ADSRStates.RELEASE 
             || this.state_ === ADSRStates.SILENT) return;
@@ -55,9 +105,16 @@ class ADSR {
         this.phase_ = 0;
     }
 
+    /**
+     * Compute next envelope output value
+     *
+     * @returns Next envelope value
+     * @memberof ADSR
+     */
     process() {
         let envValue = 0.0;
 
+        // ADSR envelope is essentially a state machine
         switch (this.state_) {
             case ADSRStates.ATTACK:
                 if (this.lastEnvValue_ < 1 - THRESH) {
@@ -110,12 +167,26 @@ class ADSR {
     }
 }
 
+/**
+ * Represents the DSP core of the FM synth. Runs in real time on a dedicated
+ * audio thread.
+ *
+ * @class FMSynthProcessor
+ * @extends {AudioWorkletProcessor}
+ */
 class FMSynthProcessor extends AudioWorkletProcessor {
+    /**
+     * Creates an instance of FMSynthProcessor.
+     * @memberof FMSynthProcessor
+     */
     constructor () {
         super();
 
-        this.envStageMaxLength = 2 * sampleRate;
+        this.envStageMaxLength = 2 * sampleRate; // 2 second env segments
 
+        // one env per operator... everything is hardcoded for now as I'm fairly
+        // sure JS's dynamic memory allocation/garbage collection would not
+        // play nicely with real time audio.
         this.env1 = new ADSR(this.envStageMaxLength, sampleRate);
         this.env2 = new ADSR(this.envStageMaxLength, sampleRate);
         this.env3 = new ADSR(this.envStageMaxLength, sampleRate);
@@ -125,6 +196,8 @@ class FMSynthProcessor extends AudioWorkletProcessor {
         this.op3_phase_ = 0.0;
         this.note_freq = 110.0;
 
+        // A sort of virtual serial channel for receiving messages from the
+        // UI thread. This is how we get our note ons and offs.
         this.port.onmessage = event => {
             if (event.data.type === 'note_on') {
                 this.noteOn(event.data.note);
@@ -135,6 +208,12 @@ class FMSynthProcessor extends AudioWorkletProcessor {
         };
     }
 
+    /**
+     * Trigger a note on
+     *
+     * @param {*} note The MIDI note number
+     * @memberof FMSynthProcessor
+     */
     noteOn(note) {
         this.note_freq = 2 ** ((note - 69)/12) * 440.0;
         this.env1.attack();
@@ -145,6 +224,11 @@ class FMSynthProcessor extends AudioWorkletProcessor {
         this.op3_phase_ = 0.0;
     }
 
+    /**
+     * Trigger a note off
+     *
+     * @memberof FMSynthProcessor
+     */
     noteOff() {
         this.note_on_ = false;
         this.env1.release();
@@ -152,6 +236,13 @@ class FMSynthProcessor extends AudioWorkletProcessor {
         this.env3.release();
     }
 
+    /**
+     * A getter for parameter settings
+     *
+     * @readonly
+     * @static
+     * @memberof FMSynthProcessor
+     */
     static get parameterDescriptors() {
         return [
             { name: 'coarse_1', defaultValue: 1.0 },
@@ -178,7 +269,17 @@ class FMSynthProcessor extends AudioWorkletProcessor {
         ];
     }
 
+    /**
+     * Computes the next output sample
+     *
+     * @param {*} inputs
+     * @param {*} outputs
+     * @param {*} params
+     * @returns
+     * @memberof FMSynthProcessor
+     */
     process(inputs, outputs, params) {
+        // Update envelope parameters
         this.env1.setParams(
             params.attack_1[0],
             params.decay_1[0],
@@ -198,10 +299,13 @@ class FMSynthProcessor extends AudioWorkletProcessor {
         for (let output of outputs) {
             for (let channel of output) {
                 for (let n = 0; n < channel.length; n++) {
+                    // Generate next envelope sample
                     const env1_amp = this.env1.process();
                     const env2_amp = this.env2.process();
                     const env3_amp = this.env3.process();
 
+                    // As mentioned in the constructor, routing resolution is
+                    // hardcoded for now.
                     const op3_out =
                         6.283 * env3_amp 
                         * params.gain_3[0] * Math.sin(this.op3_phase_);
@@ -211,6 +315,7 @@ class FMSynthProcessor extends AudioWorkletProcessor {
                     const op1_out = env1_amp * params.gain_1[0] * Math.sin(
                         this.op1_phase_ + op2_out + op3_out);
 
+                    // Update phase of each operator
                     const op1_multiplier =
                         params.coarse_1[0] + 0.001 * params.fine_1[0];
                     this.op1_phase_ +=
@@ -238,6 +343,7 @@ class FMSynthProcessor extends AudioWorkletProcessor {
                         this.op3_phase_ -= 2.0 * Math.PI;
                     }
 
+                    // Assign the sample to the relevant output channel
                     channel[n] = op1_out;
                 }
             }

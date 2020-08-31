@@ -1,6 +1,9 @@
-//
+/**
+ * Utils for creating a NexusUI synth interface
+ * @author Ben Hayes <b.j.hayes@se19.qmul.ac.uk>
+ */
+
 // Settings for Nexus UI controls
-//
 const dial_settings = {
     size: [60, 60],
     interaction: 'vertical',
@@ -21,6 +24,7 @@ const adsr_settings = {
     ]
 };
 
+// Param control ranges
 const coarse_settings = {min: 1, max: 48, step: 1, value: 1};
 const fine_settings = {min: 0, max: 999, step: 1, value: 0};
 const gain_settings = {min: 0, max: 1.0, step: 0.01, value: 0.7};
@@ -37,9 +41,7 @@ Object.assign(decay_settings, slider_settings);
 Object.assign(sustain_settings, slider_settings);
 Object.assign(release_settings, slider_settings);
 
-//
 // Define UI spec for one operator
-// 
 const operator_spec = {
     coarse: { type: Nexus.Dial, settings: coarse_settings },
     coarse_num: { type: Nexus.Number, link: 'coarse'},
@@ -54,18 +56,15 @@ const operator_spec = {
     adsr: { type: Nexus.Envelope, settings: adsr_settings },
 };
 
-//
 // UI spec for whole synth
-//
 const synth_spec = [
     Object.assign({}, operator_spec),
     Object.assign({}, operator_spec),
     Object.assign({}, operator_spec)
 ];
 
-//
-// Envelope control behaviour
-//
+// Envelope control behaviour -- keeps envelope visual up to date with slider
+// positions. Hacky and not ideal but sufficient for this purpose
 const env_callbacks = {
     attack: (env, decay, sustain, release, val) => {
         const attack_time = val / 4.0;
@@ -104,6 +103,15 @@ const env_callbacks = {
     },
 };
 
+/**
+ * Attach callbacks to the sliders associated with a given envelope control
+ *
+ * @param {*} env
+ * @param {*} attack
+ * @param {*} decay
+ * @param {*} sustain
+ * @param {*} release
+ */
 function setupEnvelopeCallbacks (env, attack, decay, sustain, release) {
     env.click = () => {};
     env.click = () => {};
@@ -134,23 +142,13 @@ function setupEnvelopeCallbacks (env, attack, decay, sustain, release) {
     release.value = release.value;
 }
 
-function initialiseFormValues (ui) {
-    let operator_index = 0;
-    for (operator of ui) {
-        for (component in operator) {
-            if (component !== 'adsr') {
-                const form_element_id =
-                    `${component}_${operator_index + 1}_form`;
-                document.getElementById(form_element_id).value = "fart";
-            }
-        }
-        operator_index += 1;
-    }
-}
-
-//
-// Generate UI from specs
-//
+/**
+ * Generates a synth UI from specs
+ *
+ * @param {*} index
+ * @param {*} param_map
+ * @returns A list of UI components
+ */
 function generateSynthUI (index, param_map) {
     const ui = [];
 
@@ -215,6 +213,13 @@ function generateSynthUI (index, param_map) {
     return ui;
 }
 
+/**
+ * Populates the UI HTML template with NexusUI behaviours
+ *
+ * @export
+ * @param {*} param_map
+ * @returns An object containing the full synth HTML and associated callback
+ */
 export async function prepareSynthUI (param_map) {
     const interface_data = await fetch ("synth_interface.html");
     const synth_html = await interface_data.text();
@@ -224,6 +229,15 @@ export async function prepareSynthUI (param_map) {
     return {synth_html, synth_callback};
 }
 
+/**
+ * Attaches generated synth HTML to a lab.js screen
+ *
+ * @export
+ * @param {*} synth_html
+ * @param {*} synth_callback
+ * @param {*} template
+ * @returns
+ */
 export function makeSynth (synth_html, synth_callback, template) {
     const synth_screen = new lab.html.Form({
         content: synth_html

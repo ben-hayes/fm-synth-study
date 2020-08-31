@@ -1,5 +1,15 @@
+/**
+ * @author Ben Hayes <b.j.hayes@se19.qmul.ac.uk>
+ */
 const md5 = require('md5');
 
+/**
+ * Takes raw response data from the experiment client and generates a formatted
+ * MongoDB document
+ *
+ * @param {*} synth_data
+ * @returns An object ready to be inserted as a MongoDB document
+ */
 function makeSynthPatchDoc(synth_data) {
     const synth_id =
         md5(Math.random().toString()

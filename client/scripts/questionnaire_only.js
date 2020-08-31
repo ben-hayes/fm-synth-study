@@ -1,3 +1,8 @@
+/**
+ * Allows a participant to take only the questionnaire (if for some reason it 
+ * wasn't properly submitted)
+ * @author Ben Hayes <b.j.hayes@se19.qmul.ac.uk>
+ */
 requirejs(
     ['./experiment'],
     function(experiment)

@@ -1,8 +1,10 @@
+/**
+ * Implements the UI of the FM synth
+ * @author Ben Hayes <b.j.hayes@se19.qmul.ac.uk>
+ */
 define(function() {
-//
-// Settings for Nexus UI controls
-//
 
+// Settings for Nexus UI controls
 const default_param_map = {
     attack_1: 0.15,
     decay_1: 0.25,

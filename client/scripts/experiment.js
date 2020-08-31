@@ -1,3 +1,8 @@
+/**
+ * Implements the experiment flow using the lab.js framework. Entry point is
+ * createExperiment.
+ * @author Ben Hayes <b.j.hayes@se19.qmul.ac.uk>
+ */
 requirejs.config({
     shim: {
         lab: {
@@ -431,6 +436,17 @@ async function getExperimentText() {
     return intro_prompts;
 }
 
+/**
+ * Given the relevant specs and pointers the the synth and UI components, build
+ * the full experiment.
+ *
+ * @param {*} fm_synth
+ * @param {*} fm_synth_ui
+ * @param {*} trials
+ * @param {*} semantic_descriptors
+ * @param {*} participant_id
+ * @returns
+ */
 async function createExperiment(
     fm_synth,
     fm_synth_ui,
